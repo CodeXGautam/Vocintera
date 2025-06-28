@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom animations for animated gradient */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes meshMove {
+  0% { transform: scale(1) rotate(0deg); }
+  100% { transform: scale(1.05) rotate(0.5deg); }
+}
+
+/* Enhanced pulse animation - more subtle for dark theme */
+@keyframes enhancedPulse {
+  0%, 100% { opacity: 0.1; transform: scale(1); }
+  50% { opacity: 0.25; transform: scale(1.02); }
+}
+
+.animate-enhanced-pulse {
+  animation: enhancedPulse 6s ease-in-out infinite;
+}
+
+/* Ensure the gradient is visible */
+.gradient-bg {
+  background: linear-gradient(45deg, #1e293b, #334155, #475569, #64748b);
+  background-size: 400% 400%;
+  animation: gradientShift 20s ease infinite;
+}
