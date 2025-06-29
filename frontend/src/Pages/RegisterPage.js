@@ -43,7 +43,7 @@ const RegisterPage = () => {
 
     return (
         <div className="flex min-h-screen justify-center items-center gap-10 items-center p-10 w-[100%]">
-            <form className="flex flex-col gap-4 w-[50%] border-2 shadow-md shadow-blue-900 
+            <form className="flex flex-col gap-4 w-[80%] sm:w-[80%] md:w-[50%] lg:w-[50%] border-2 shadow-md shadow-blue-900 
             border-slate-900 p-10 rounded-xl min-w-[300px]" onSubmit={submitHandler}>
 
                 <div className="flex flex-col justify-between gap-3 items-center w-[100%] lg:flex-row lg:gap-4">
@@ -125,7 +125,7 @@ const RegisterPage = () => {
                     <span className="w-[100%] h-[1px] bg-slate-800"></span>
                 </div>
 
-                <div className="bg-blue-950 p-4 rounded-xl flex justify-center items-center gap-4 text-gray-200 
+                <div className="bg-blue-950 p-4 rounded-xl flex justify-center cursor-pointer items-center gap-4 text-gray-200 
                 hover:bg-blue-800 transition-all duration-200 hover:scale-[1.05] hover:text-gray-100 shadow-lg shadow-blue-500">
                     Sign Up with Google <FcGoogle />
                 </div>
