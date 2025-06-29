@@ -5,7 +5,9 @@ import { useState } from 'react';
 import Footer from './Components/Footer';
 
 import RegisterPage from './Pages/RegisterPage';
-import LoginPage from './Pages/LoginPage'
+import LoginPage from './Pages/LoginPage';
+import Home from './Pages/Home';
+
 
 const App = () => {
 
@@ -23,7 +25,10 @@ const App = () => {
         <Route path='*' element={<LandingPage />} />
         <Route path='/register' element={<RegisterPage />} />
         <Route path='/login' element={<LoginPage />} />
-
+        {
+          loggedIn &&
+          <Route path='/home' element={<Home/>}/>
+        }
       </Routes>
 
       <Footer />

@@ -8,13 +8,13 @@ const LandingPage = () => {
 
     const navigate = useNavigate()
 
-    const clickHandler = () =>{
+    const clickHandler = () => {
         navigate('/register');
     }
 
     return (
         <div className="flex flex-col text-gray-300 justify-center text-center mx-auto w-full gap-10 p-5">
-                  <SplashCursor />
+            <SplashCursor />
             <div className='flex w-[100%] p-5 justify-evenly'>
                 <div className='flex flex-col justify-center items-center gap-3 w-[80%]'>
                     <h1 className='flex justify-center items-center font-bold text-blue-400 text-3xl'>Train Smart</h1>
@@ -22,9 +22,14 @@ const LandingPage = () => {
                     <span className='flex text-gray-300 text-lg'>Voice-powered mock interviews to prepare you for the real deal</span>
                     <span className='flex text-gray-300 text-lg'>Train with AI. Interview with Confidence</span>
                     <button className='bg-blue-700 text-gray-300 p-4 rounded-xl hover:bg-blue-800 transition-all 
-                    duration-300 shadow-md shadow-blue-500'>Get Started</button>
+                    duration-300 shadow-md shadow-blue-500'
+                        onClick={clickHandler}>
+                        Get Started
+                    </button>
                 </div>
-                <Dbot />
+                <div className='flex justify-center items-center hidden sm:flex md:flex lg:flex xl:flex 2xl:flex'>
+                    <Dbot />
+                </div>
             </div>
 
             {/* <div className='h-[2px] w-full bg-blue-950'></div> */}
