@@ -146,7 +146,7 @@ const RegisterPage = () => {
                         backgroundImage: 'linear-gradient(120deg, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 0) 60%)',
                         backgroundSize: '200% 100%',
                         WebkitBackgroundClip: 'text',
-                        animationDuration: '5s',
+                        animationDuration: '5s'
                     }}>
                     Train with AI. Interview with confidence
                 </h2>
