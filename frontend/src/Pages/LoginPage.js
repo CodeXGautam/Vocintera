@@ -10,12 +10,8 @@ const LoginPage = () => {
    const [showpassword, setShowPassword] = useState(false);
 
    const [formData, setFormData] = useState({
-      firstname: '',
-      lastname: '',
-      username: '',
       email: '',
       password: '',
-      confirmPassword: ''
    })
 
    const passHandler = () => {
