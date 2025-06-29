@@ -1,27 +1,32 @@
-import {Routes , Route} from 'react-router';
+import { Routes, Route } from 'react-router';
 import LandingPage from './Pages/LandingPage';
 import Navbar from './Components/Navbar';
 import { useState } from 'react';
 import Footer from './Components/Footer';
-import SplashCursor from './Components/SplashCursor'
+
+import RegisterPage from './Pages/RegisterPage';
+import LoginPage from './Pages/LoginPage'
 
 const App = () => {
 
-  const[loggedIn , setLoggedIn] = useState(true);
+  const [loggedIn, setLoggedIn] = useState(false);
 
 
 
   return (
     <div className="bg-slate-950 min-h-screen flex flex-col gap-10 relative">
-      <SplashCursor/>
 
-      <Navbar loggedIn= {loggedIn} setLoggedIn= {setLoggedIn}/>
+
+      <Navbar loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
 
       <Routes>
-        <Route path='*' element={<LandingPage/>}/>
+        <Route path='*' element={<LandingPage />} />
+        <Route path='/register' element={<RegisterPage />} />
+        <Route path='/login' element={<LoginPage />} />
+
       </Routes>
 
-      <Footer/>
+      <Footer />
     </div>
   );
 }
