@@ -4,7 +4,6 @@ import Navbar from './Components/Navbar';
 import { useState } from 'react';
 import Footer from './Components/Footer';
 import SplashCursor from './Components/SplashCursor'
-import AnimatedGradient from './Components/AnimatedGradient'
 
 const App = () => {
 
@@ -14,7 +13,6 @@ const App = () => {
 
   return (
     <div className="bg-slate-950 min-h-screen flex flex-col gap-10 relative">
-      <AnimatedGradient />
       <SplashCursor/>
 
       <Navbar loggedIn= {loggedIn} setLoggedIn= {setLoggedIn}/>

@@ -1,7 +1,16 @@
 import Scroll from '../Components/Scroll';
 import Dbot from '../Components/Dbot';
+import Orb from '../Components/Orb'
+import { useNavigate } from 'react-router-dom';
 
 const LandingPage = () => {
+
+    const navigate = useNavigate()
+
+    const clickHandler = () =>{
+        navigate('/register');
+    }
+
     return (
         <div className="flex flex-col text-gray-300 justify-center text-center mx-auto w-full gap-10 p-5">
 
@@ -29,13 +38,24 @@ const LandingPage = () => {
 
             <div className='flex justify-center items-center relative w-[100%] border-r-2 border-b-2 
             border-blue-950 p-20 rounded-xl'>
+
+                <div className='absolute w-[100%] flex justify-center items-center h-[100%]'>
+                    <Orb
+                        hoverIntensity={0.5}
+                        rotateOnHover={true}
+                        hue={0}
+                        forceHoverState={false}
+                    />
+
+                </div>
                 <img src='https://cdn.prod.website-files.com/61a05ff14c09ecacc06eec05/6720e94e1cd203b14c045522_%20Interview-Notes.jpg'
-                    alt='' className='w-[70%] min-w-[350px] opacity-[0.3] rounded-xl shadow-xl shadow-blue-700' />
-                <div className='absolute m-auto h-[100%] flex flex-col gap-3 justify-center items-center'>
+                    alt='' className='w-[70%] min-w-[350px] opacity-[0.2] rounded-xl shadow-xl shadow-blue-700' />
+                <div className='absolute m-auto h-[100%] flex flex-col gap-3 justify-center items-center z-[10]'>
                     <h1 className='text-4xl text-white font-bold'>Ace Your Next Interview</h1>
                     <p className='text-sm font-semibold'>Practice with realistic mock interviews and get personalized feedback to improve your performance</p>
                     <button className='bg-blue-700 text-gray-300 p-4 rounded-xl hover:bg-blue-800 transition-all 
-                    duration-300 shadow-md shadow-blue-500 font-bold'>Get Started</button>
+                    duration-300 shadow-md shadow-blue-500 font-bold' onClick={clickHandler}>
+                        Get Started</button>
                 </div>
             </div>
 
