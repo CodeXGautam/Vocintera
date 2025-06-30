@@ -2,7 +2,7 @@ import { NavLink } from "react-router-dom"
 
 const Footer = () => {
     return (
-        <div className="flex flex-col gap-4 mt-5 mb-2">
+        <div className="flex flex-col gap-4 mt-20 mb-2">
 
             <div className="flex text-gray-400 justify-evenly items-center text-md">
                 <NavLink to='/product' className='hover:text-gray-300'>

@@ -4,9 +4,14 @@ import { FcGoogle } from "react-icons/fc";
 import { FaRegEye } from "react-icons/fa";
 import { FaRegEyeSlash } from "react-icons/fa";
 import BlurText from "../Components/BlurText";
+import Navbar from "../Components/Navbar";
+import Footer from "../Components/Footer";
 
 
-const RegisterPage = () => {
+const RegisterPage = (props) => {
+
+    const loggedIn = props.loggedIn;
+    const setLoggedIn = props.setLoggedIn;
 
     const [formData, setFormData] = useState({
         firstname: '',
@@ -42,7 +47,9 @@ const RegisterPage = () => {
     }
 
     return (
-        <div className="flex min-h-screen justify-center items-center gap-10 items-center p-10 w-[100%]">
+        <div className="flex flex-col">
+             <Navbar loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
+        <div className="flex min-h-screen justify-center items-center gap-10 p-10 w-[100%]">
             <form className="flex flex-col gap-4 w-[80%] sm:w-[80%] md:w-[50%] lg:w-[50%] border-2 shadow-md shadow-blue-900 
             border-slate-900 p-10 rounded-xl min-w-[300px]" onSubmit={submitHandler}>
 
@@ -154,6 +161,9 @@ const RegisterPage = () => {
                     alt='' className='min-w-[300px] opacity-[0.2] rounded-xl shadow-xl shadow-blue-700 mt-5' />
             </div>
         </div >
+        
+        <Footer/>
+        </div>
     )
 }
 

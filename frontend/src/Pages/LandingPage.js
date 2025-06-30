@@ -3,8 +3,13 @@ import Dbot from '../Components/Dbot';
 import Orb from '../Components/Orb'
 import SplashCursor from '../Components/SplashCursor'
 import { useNavigate } from 'react-router-dom';
+import Navbar from '../Components/Navbar';
+import Footer from '../Components/Footer';
 
-const LandingPage = () => {
+const LandingPage = (props) => {
+
+    const loggedIn = props.loggedIn;
+    const setLoggedIn = props.setLoggedIn;
 
     const navigate = useNavigate()
 
@@ -15,6 +20,7 @@ const LandingPage = () => {
     return (
         <div className="flex flex-col text-gray-300 justify-center text-center mx-auto w-full gap-10 p-5">
             <SplashCursor />
+            <Navbar loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
             <div className='flex w-[100%] p-5 justify-evenly'>
                 <div className='flex flex-col justify-center items-center gap-3 w-[80%]'>
                     <h1 className='flex justify-center items-center font-bold text-blue-400 text-3xl'>Train Smart</h1>
@@ -66,7 +72,7 @@ const LandingPage = () => {
             </div>
 
 
-
+        <Footer/>
         </div>
     )
 }
