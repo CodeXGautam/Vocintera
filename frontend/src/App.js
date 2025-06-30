@@ -22,7 +22,7 @@ const App = () => {
       <Navbar loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
 
       <Routes>
-        <Route path='*' element={<LandingPage />} />
+        <Route path='/' element={<LandingPage />} />
         <Route path='/register' element={<RegisterPage />} />
         <Route path='/login' element={<LoginPage />} />
         {
