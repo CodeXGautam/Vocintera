@@ -61,8 +61,8 @@ const Navbar = (props) => {
 
                 {
                     loggedIn &&
-                    <NavLink to='/dashboard' className='hover:bg-gray-900 p-2 rounded-xl'>
-                      Dashboard
+                    <NavLink to='/practice' className='hover:bg-gray-900 p-2 rounded-xl'>
+                      Practice
                     </NavLink>
                 }
 

@@ -1,155 +1,113 @@
-import { IoHome } from "react-icons/io5";
-import { RiDashboardFill } from "react-icons/ri";
-import { IoSettingsOutline } from "react-icons/io5";
-import { RiMenuUnfold2Line } from "react-icons/ri";
-import { RiMenuUnfoldLine } from "react-icons/ri";
-import { NavLink, useNavigate } from 'react-router';
-import { DiCode } from "react-icons/di";
-import { useState } from "react";
+import { BiSolidDashboard } from "react-icons/bi";
+import { useNavigate } from 'react-router';
 import Footer from "../Components/Footer";
+import Sidebar from "../Components/Sidebar";
 
 
 
-const Home = () => {
 
-    const [menuBar, setMenuBar] = useState(true);
+const Home = (props) => {
 
+    const loggedIn = props.loggedIn;
+    const setLoggedIn = props.setLoggedIn;
 
     const navigate = useNavigate();
 
-    const menuHandler = () => {
-        if (menuBar === true) {
-            document.querySelector('.menu').classList.add('transform', 'translate-x-[-80%]');
-            setMenuBar(false);
-        }
-        else if (menuBar === false) {
-            document.querySelector('.menu').classList.remove('transform', 'translate-x-[-80%]');
-            setMenuBar(true);
-        }
+    const joinInterviewHandler = () => {
+        // interview join button 
     }
 
-    const logoutHandler = () => {
-        navigate('/');
+    const scheduleInterviewHandler = () =>{
+        //schedule interview
+        navigate('/interview');
     }
 
 
     return (
-        <div className="flex w-[100%] min-h-screen relative mt-2 gap-4 overflow-hidden">
-            <div className="menu w-[23%] min-w-[240px] fixed left-0 top-0 h-screen bg-slate-900 p-5 rounded-md flex flex-col
-               justify-between items-center shadow-md shadow-blue-800 md:hidden lg:hidden xl:hidden 2xl:hidden
-               transition-all duration-300 ease-in-out">
-                <div className="flex flex-col gap-5 w-[100%]">
+        <div className="flex w-[100%] min-h-screen relative gap-4 overflow-hidden">
+            <Sidebar loggedIn = {loggedIn} setLoggedIn = {setLoggedIn}/>
 
-
-
-                    <div className="flex justify-between items-center w-[100%] mb-5">
-
-                        <h1 className='text-[#b5b5b5a4] bg-clip-text animate-shine font-extrabold text-3xl flex
-                            items-center justify-center'
-                            style={{
-                                backgroundImage: 'linear-gradient(120deg, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 0) 60%)',
-                                backgroundSize: '200% 100%',
-                                WebkitBackgroundClip: 'text',
-                                animationDuration: '5s'
-                            }}>
-                            Vocintera
-                        </h1>
-
-                        <div className="flex justify-center items-center text-xl text-slate-300 hover:text-white
-                         cursor-pointer" onClick={menuHandler}>
-                            {
-                                menuBar ? <RiMenuUnfold2Line /> : <RiMenuUnfoldLine />
-                            }
-                        </div>
-
-                    </div>
-
-                    <div className="flex justify-start items-center gap-4">
-                        <span className="w-[40px] h-[40px] rounded-full bg-blue-700 shadow-md shadow-blue-500"></span>
-                        {/* user's firstname */}
-                        <span className="text-white font-semibold"> Hi User</span>
-                    </div>
-
-                    <NavLink to='/home' className="flex justify-start items-center text-slate-300 hover:text-white
-                    hover:bg-slate-800 rounded-lg p-2 cursor-pointer w-[100%] gap-4">
-                        <IoHome /> Home
-                    </NavLink>
-                    <NavLink to='/dashboard' className="flex justify-start items-center text-slate-300 hover:text-white
-                    hover:bg-slate-800 rounded-lg p-2 cursor-pointer w-[100%] gap-4">
-                        <RiDashboardFill /> Dashboard
-                    </NavLink>
-                    <NavLink to='/practice' className="flex justify-start items-center text-slate-300 hover:text-white
-                    hover:bg-slate-800 rounded-lg p-2 cursor-pointer w-[100%] gap-4">
-                        <DiCode /> Practice
-                    </NavLink>
-                    <NavLink to='/settings' className="flex justify-start items-center text-slate-300 hover:text-white
-                    hover:bg-slate-800 rounded-lg p-2 cursor-pointer w-[100%] gap-4">
-                        <IoSettingsOutline /> Settings
-                    </NavLink>
-                </div>
-
-                <button className="flex justify-center items-center text-red-500 hover:text-red-600
-                    hover:bg-slate-800 rounded-lg p-2 cursor-pointer w-[100%]"
-                    onClick={logoutHandler}>
-                    Logout
-                </button>
-            </div>
-
-            <div className="w-[25%] min-w-[220px] h-screen bg-slate-900 p-5 rounded-md flex flex-col
-               justify-between items-center shadow-md shadow-blue-800 hidden md:flex lg:flex xl:flex 2xl:flex
-               transition-all duration-300 ease-in-out">
-                <div className="flex flex-col gap-5 w-[100%]">
-
-                    <h1 className='text-[#b5b5b5a4] mb-5 bg-clip-text inline-block animate-shine font-extrabold text-3xl'
-                        style={{
-                            backgroundImage: 'linear-gradient(120deg, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 0) 60%)',
-                            backgroundSize: '200% 100%',
-                            WebkitBackgroundClip: 'text',
-                            animationDuration: '5s'
-                        }}>
-                        Vocintera
-                    </h1>
-
-                    <div className="flex justify-start items-center gap-4">
-                        <span className="w-[40px] h-[40px] rounded-full bg-blue-700 shadow-md shadow-blue-500"></span>
-                        {/* user's firstname */}
-                        <span className="text-white font-semibold"> Hi User</span>
-                    </div>
-
-
-                    <NavLink to='/home' className="flex justify-start items-center text-slate-300 hover:text-white
-                    hover:bg-slate-800 rounded-lg p-2 cursor-pointer w-[100%] gap-4">
-                        <IoHome /> Home
-                    </NavLink>
-                    <NavLink to='/dashboard' className="flex justify-start items-center text-slate-300 hover:text-white
-                    hover:bg-slate-800 rounded-lg p-2 cursor-pointer w-[100%] gap-4">
-                        <RiDashboardFill /> Dashboard
-                    </NavLink>
-                    <NavLink to='/practice' className="flex justify-start items-center text-slate-300 hover:text-white
-                    hover:bg-slate-800 rounded-lg p-2 cursor-pointer w-[100%] gap-4">
-                        <DiCode /> Practice
-                    </NavLink>
-                    <NavLink to='/settings' className="flex justify-start items-center text-slate-300 hover:text-white
-                    hover:bg-slate-800 rounded-lg p-2 cursor-pointer w-[100%] gap-4">
-                        <IoSettingsOutline /> Settings
-                    </NavLink>
-                </div>
-
-                <button className="flex justify-center items-center text-red-500 hover:text-red-600
-                    hover:bg-slate-800 rounded-lg p-2 cursor-pointer w-[100%]"
-                    onClick={logoutHandler}>
-                    Logout
-                </button>
-            </div>
-
-            <div className="w-[100%] max-h-screen bg-slate-900 flex flex-col gap-10 transition-all
+            <div className="w-[100%] max-h-screen bg-slate-900 flex flex-col gap-8 transition-all
             duration-300 ease-in-out rounded-md shadow-md shadow-blue-500 p-5 overflow-y-scroll">
-                
-                <div className="fle">
+
+                <h1 className="flex  gap-2 justify-start items-center text-gray-300 font-semibold text-3xl">
+                    <BiSolidDashboard /> Dashboard
+                </h1>
+
+                <h2 className="flex justify-start items-center text-gray-400 font-semibold text-2xl">
+                    Upcoming Interviews
+                </h2>
+
+                <div className="flex justify-between w-[100%] border-2 border-blue-900 p-4 rounded-xl">
+                    <div className="flex flex-col gap-2 justify-center items-start">
+
+                        {/* interview details will be fetched from backend  */}
+
+                        <h2 className="flex text-gray-400 text-xl">Interview with Vocintera</h2>
+                        <h2 className="flex text-blue-700 text-md">Software Development role</h2>
+                        <button className="flex justify-center items-center bg-slate-700 text-slate-300 p-2 text-sm
+                         rounded-md hover:bg-slate-600 hover:scale-[1.05] transition-all duration-300
+                         shadow-md shadow-blue-700"
+                            onClick={joinInterviewHandler}>
+                            Join
+                        </button>
+                    </div>
+
+                    <img src="" alt="" />
 
                 </div>
 
-                <Footer/>
+                <h1 className="flex justify-start text-slate-400 font-semibold text-2xl">
+                    Past Interview Performance
+                </h1>
+
+                <div className="flex gap-2 items-center w-[100%]">
+                    {/* fetch past interview performance from backend  */}
+                    <div className="flex flex-col gap-4 border-2 border-blue-900 p-4 rounded-xl w-[100%]">
+                        <h2 className="flex justify-start items-center text-lg text-slate-400">Overall Performance</h2>
+                        <div className="flex items-center justify-start text-md text-slate-400 font-bold">
+                            {/* percentage */}
+                            85%
+                        </div>
+                        <div>
+                            {/* performance graph */}
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col gap-4 border-2 border-blue-900 p-4 rounded-xl w-[100%]">
+                        <h2 className="flex justify-start items-center text-lg text-slate-400">Skill Breakdown</h2>
+                        <div className="flex items-center justify-start text-md text-slate-400 font-bold">
+                            {/* percentage */}
+                            78%
+                        </div>
+                        <div>
+                            {/* performance graph */}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex flex-col gap-4">
+                <h2 className="flex justify-start items-center text-xl font-semibold text-blue-800">
+                    Quick Actions
+                </h2>
+
+                <div className="flex items-center justify-start gap-3">
+                        <button className="flex items-center text-md p-2 justify-center bg-blue-800 text-slate-300
+                        hover:text-slate-200 hover:scale-[1.05] hover:bg-blue-700 rounded-lg transition-all 
+                        duration-300 ease-in-out shadow-md shadow-blue-600"
+                        onClick={scheduleInterviewHandler}>
+                            Schedule an Interview
+                        </button>
+
+                       <button className="flex items-center text-md p-2 justify-center bg-slate-700 text-slate-300
+                        hover:text-slate-200 hover:scale-[1.05] hover:bg-slate-600 rounded-lg transition-all
+                         duration-300 ease-in-out shadow-md shadow-blue-600">
+                            Resources
+                        </button>
+                </div>
+
+                </div>
+                <Footer />
             </div>
 
         </div>

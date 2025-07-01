@@ -4,6 +4,7 @@ import { useState } from 'react';
 import RegisterPage from './Pages/RegisterPage';
 import LoginPage from './Pages/LoginPage';
 import Home from './Pages/Home';
+import Practice from './Pages/Practice';
 
 
 const App = () => {
@@ -22,6 +23,10 @@ const App = () => {
         {
           loggedIn &&
           <Route path='/home' element={<Home loggedIn={loggedIn} setLoggedIn={setLoggedIn}/>}/>
+        }
+         {
+          loggedIn &&
+          <Route path='/practice' element={<Practice loggedIn={loggedIn} setLoggedIn={setLoggedIn}/>}/>
         }
       </Routes>
     </div>
