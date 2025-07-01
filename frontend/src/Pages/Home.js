@@ -144,56 +144,9 @@ const Home = () => {
 
             <div className="w-[100%] max-h-screen bg-slate-900 flex flex-col gap-10 transition-all
             duration-300 ease-in-out rounded-md shadow-md shadow-blue-500 p-5 overflow-y-scroll">
-                helloo this is ths main box for the home page
+                
+                <div className="fle">
 
-                <div>
-                    how are you
-                </div>
-
-                <div>
-                    this is testing something 
-                </div>
-
-                <div>This is ....</div>
-
-                <div>
-                   <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9SRRmhH4X5N2e4QalcoxVbzYsD44C-sQv-w&s" alt=""/>
-                </div>
-
-                <div>
-                   <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9SRRmhH4X5N2e4QalcoxVbzYsD44C-sQv-w&s" alt=""/>
-                </div>
-
-                <div>
-                   <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9SRRmhH4X5N2e4QalcoxVbzYsD44C-sQv-w&s" alt=""/>
-                </div>
-
-
-                <div>
-                   <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9SRRmhH4X5N2e4QalcoxVbzYsD44C-sQv-w&s" alt=""/>
-                </div>
-
-
-                <div>
-                   <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9SRRmhH4X5N2e4QalcoxVbzYsD44C-sQv-w&s" alt=""/>
-                </div>
-
-
-                <div>
-                   <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9SRRmhH4X5N2e4QalcoxVbzYsD44C-sQv-w&s" alt=""/>
-                </div>
-
-
-                <div>
-                   <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9SRRmhH4X5N2e4QalcoxVbzYsD44C-sQv-w&s" alt=""/>
-                </div>
-
-                <div>
-                   <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9SRRmhH4X5N2e4QalcoxVbzYsD44C-sQv-w&s" alt=""/>
-                </div>
-
-                <div>
-                   <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9SRRmhH4X5N2e4QalcoxVbzYsD44C-sQv-w&s" alt=""/>
                 </div>
 
                 <Footer/>
