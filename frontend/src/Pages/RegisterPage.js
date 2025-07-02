@@ -100,28 +100,27 @@ const RegisterPage = (props) => {
                         }
 
                         else if (response.message === "User registered successfully") {
-                                               console.log('Success:', response);
-                        // Handle success, e.g., redirect to login or home page
-                        toast.success("Account Created");
-                        setLoggedIn(true);
-                        navigate('/home');
+                            console.log('Success:', response);
+                            toast.success("Account Created");
+                            setLoggedIn(true);
+                            navigate('/home');
 
-                        setFormData({
-                            firstName: "",
-                            lastName: "",
-                            userName: "",
-                            email: "",
-                            password: "",
-                            confirmPassword: ""
-                        });
+                            setFormData({
+                                firstName: "",
+                                lastName: "",
+                                userName: "",
+                                email: "",
+                                password: "",
+                                confirmPassword: ""
+                            });
 
-                        console.log("Form submitted");
+                            console.log("Form submitted");
                         }
                     })
             }
         } catch (error) {
-                console.error('Error:', error);
-                toast.error("Registration failed. Please try again.");
+            console.error('Error:', error);
+            toast.error("Registration failed. Please try again.");
         }
     }
 

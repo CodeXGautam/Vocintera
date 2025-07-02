@@ -1,13 +1,16 @@
 import { useState } from "react";
-import { NavLink } from 'react-router';
+import { NavLink, useNavigate } from 'react-router';
 import { FcGoogle } from "react-icons/fc";
 import { FaRegEye } from "react-icons/fa";
 import { FaRegEyeSlash } from "react-icons/fa";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
+import toast from "react-hot-toast";
 
 
 const LoginPage = (props) => {
+
+   const navigate = useNavigate();
 
    const loggedIn = props.loggedIn;
    const setLoggedIn = props.setLoggedIn;
@@ -30,9 +33,46 @@ const LoginPage = (props) => {
       })
    }
 
-   const submitHandler = (event) => {
+   const submitHandler = async (event) => {
       event.preventDefault();
-      console.log(formData);
+     try {
+      if(!formData.email || !formData.password){
+         toast.error("All fields are required");
+         return;
+      }
+
+      if(formData.password.length <6){
+         toast.error("Password must be at least 6 characters long");
+         return;
+      }
+
+      await fetch(process.env.REACT_APP_BACKEND_URI + '/login', {
+         method: 'POST',
+         headers: {
+            'Content-Type': 'application/json'
+         },
+         credentials: 'include',
+         body: JSON.stringify(formData)
+      })
+      .then(response => response.json())
+      .then(response => {
+         if(response.message === "Invalid credentials"){
+            toast.error("Invalid credentials");
+         }
+         else if(response.message === "User not found"){
+            toast.error("User not found");
+         }
+         else if(response.message === "Login successful"){
+            console.log('i am clicked');
+            toast.success("User logged In");
+            setLoggedIn(true);
+            navigate('/home')
+         }
+      })
+     } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong");
+     }
    }
 
    const googleHandler = () => {
