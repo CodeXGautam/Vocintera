@@ -55,11 +55,12 @@ const RegisterPage = (props) => {
             }
 
             else {
-                await fetch(process.env.BACKEND_URI + '/register', {
+                await fetch(process.env.REACT_APP_BACKEND_URI + '/register', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
+                    credentials: 'include',
                     body: JSON.stringify(
                         formData
                     )

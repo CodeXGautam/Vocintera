@@ -11,7 +11,7 @@ import Settings from './Pages/Settings';
 
 const App = () => {
 
-  const [loggedIn, setLoggedIn] = useState(true);
+  const [loggedIn, setLoggedIn] = useState(false);
 
 
 
