@@ -22,6 +22,11 @@ const Home = (props) => {
         navigate('/interview');
     }
 
+    const resourceHandler = () =>{
+        //navigate to practice page
+        navigate('/practice')
+    }
+
 
     return (
         <div className="flex w-[100%] min-h-screen relative gap-4 overflow-hidden">
@@ -101,7 +106,8 @@ const Home = (props) => {
 
                        <button className="flex items-center text-md p-2 justify-center bg-slate-700 text-slate-300
                         hover:text-slate-200 hover:scale-[1.05] hover:bg-slate-600 rounded-lg transition-all
-                         duration-300 ease-in-out shadow-md shadow-blue-600">
+                         duration-300 ease-in-out shadow-md shadow-blue-600"
+                         onClick={resourceHandler}>
                             Resources
                         </button>
                 </div>
