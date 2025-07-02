@@ -44,7 +44,7 @@ const Home = (props) => {
                 </h2>
 
                 <div className="flex justify-between w-[100%] border-2 border-blue-900 p-4 rounded-xl">
-                    <div className="flex flex-col gap-2 justify-center items-start">
+                    <div className="flex flex-col gap-2 items-start">
 
                         {/* interview details will be fetched from backend  */}
 
@@ -58,7 +58,10 @@ const Home = (props) => {
                         </button>
                     </div>
 
-                    <img src="" alt="" />
+                    <div className="flex justify-center items-center rounded-xl opacity-[0.4]">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRPRwgKrfySS9Kd6_0DSFB6ZyVgpmScXBVI0w&s"
+                      alt="interview image" className="w-[100%] rounded-xl"/>
+                    </div>
 
                 </div>
 

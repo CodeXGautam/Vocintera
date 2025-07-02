@@ -1,8 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import { registerUser, loginUser, refreshAccessToken } from './controllers/userController.js';
-
+import { registerUser, loginUser, refreshAccessToken, logoutUser } from './controllers/userController.js';
+import { verifyJwt } from './middleware/auth.middleware.js';
 
 const app = express();
 
@@ -27,6 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 app.post('/api/v1/register', registerUser);
 app.post('/api/v1/login', loginUser);
 app.post('/api/v1/refresh-token', refreshAccessToken);
+app.get('/api/v1/logout',verifyJwt, logoutUser);
 
 
 export default app;

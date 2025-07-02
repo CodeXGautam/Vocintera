@@ -1,4 +1,5 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 
 const Navbar = (props) => {
@@ -7,9 +8,29 @@ const Navbar = (props) => {
     const setLoggedIn = props.setLoggedIn;
     const navigate = useNavigate();
 
-    const logOutHandler = () =>{
-        navigate('/');
-        setLoggedIn(false);
+    const logOutHandler = async() =>{
+        try{
+            await fetch(process.env.REACT_APP_BACKEND_URI + '/logout', {
+                method: 'GET',
+                credentials: 'include',
+            })
+            .then(response => response.json())
+            .then(response => {
+                if(response.message === "User not found"){
+                    toast.error("User not found");
+                    return;
+                }
+                
+                if(response.message === "Logged out successfully"){
+                    toast.success("Logged out");
+                    navigate('/');
+                    setLoggedIn(false);
+                }
+            })
+        } catch (error) {
+            console.log(error);
+            toast.error("Something went wrong");
+        }
     }
 
 

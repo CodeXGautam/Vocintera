@@ -6,43 +6,66 @@ import { NavLink, useNavigate } from 'react-router';
 import { DiCode } from "react-icons/di";
 import { SlCalender } from "react-icons/sl";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
-const Sidebar = (props) =>{
+
+
+const Sidebar = (props) => {
 
     const setLoggedIn = props.setLoggedIn;
 
-    const [menuBar, setMenuBar] = useState(true);
+    const [menuBar, setMenuBar] = useState(false);
 
 
     const navigate = useNavigate();
 
     const menuHandler = () => {
         if (menuBar === true) {
-            document.querySelector('.menu').classList.add('transform', 'translate-x-[-80%]','bg-transparent',);
-            document.querySelector('.menu-icon').classList.add('bg-slate-500', 'text-white','p-2', 'rounded-full')
+            document.querySelector('.menu').classList.add('transform', 'translate-x-[-80%]', 'bg-transparent',);
+            document.querySelector('.menu-icon').classList.add('bg-slate-500', 'text-white', 'p-2', 'rounded-full')
             document.querySelector('.menu').classList.remove('shadow-md');
             document.querySelector('.menu-items').classList.remove('active');
             setMenuBar(false);
         }
         else if (menuBar === false) {
             document.querySelector('.menu').classList.remove('transform', 'translate-x-[-80%]', 'bg-transparent');
-            document.querySelector('.menu-icon').classList.remove('bg-slate-500', 'text-white','p-2', 'rounded-full')
+            document.querySelector('.menu-icon').classList.remove('bg-slate-500', 'text-white', 'p-2', 'rounded-full')
             document.querySelector('.menu').classList.add('shadow-md');
             document.querySelector('.menu-items').classList.add('active');
             setMenuBar(true);
         }
     }
 
-    const logoutHandler = () => {
-        navigate('/');
-        setLoggedIn(false);
+    const logoutHandler = async () => {
+        try {
+            await fetch(process.env.REACT_APP_BACKEND_URI + '/logout', {
+                method: 'GET',
+                credentials: 'include',
+            })
+                .then(response => response.json())
+                .then(response => {
+                    if (response.message === "User not found") {
+                        toast.error("User not found");
+                        return;
+                    }
+
+                    if (response.message === "Logged out successfully") {
+                        toast.success("Logged out");
+                        navigate('/');
+                        setLoggedIn(false);
+                    }
+                })
+        } catch (error) {
+            console.log(error);
+            toast.error("Something went wrong");
+        }
     }
 
-    return(
+    return (
         <div className="">
-                        <div className="menu w-[23%] min-w-[240px] fixed left-0 top-0 h-screen bg-slate-900 p-5 rounded-md flex flex-col
+            <div className="menu w-[23%] min-w-[240px] fixed left-0 top-0 h-screen bg-slate-900 p-5 rounded-md flex flex-col
                justify-between items-center shadow-md shadow-blue-800 md:hidden lg:hidden xl:hidden 2xl:hidden
-               transition-all duration-300 ease-in-out">
+               transition-all duration-300 ease-in-out z-[1000]">
                 <div className="flex flex-col gap-5 w-[100%]">
 
 
