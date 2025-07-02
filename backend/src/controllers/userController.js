@@ -94,7 +94,7 @@ const loginUser = async (req, res) => {
             return res.status(400).json({ message: "All fields are required" });
         };
 
-        const user = await User.findById({ email: email});
+        const user = await User.findOne({email : email});
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         };
