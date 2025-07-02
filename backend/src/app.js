@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import { registerUser, loginUser, refreshAccessToken } from './controllers/userController.js';
 
 
 const app = express();
@@ -21,6 +22,11 @@ app.use((req, res, next) => {
 app.use(cookieParser());           
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+
+app.post('/api/v1/register', registerUser);
+app.post('/api/v1/login', loginUser);
+app.post('/api/v1/refresh-token', refreshAccessToken);
 
 
 export default app;

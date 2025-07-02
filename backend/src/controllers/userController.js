@@ -43,10 +43,7 @@ const registerUser = async (req, res) => {
 
         //checking for existing user 
         const existingUser = await User.findOne({
-            $or: {
-                username: username.tolowerCase(),
-                email: email.tolowerCase()
-            }
+            $or: [{ email }, { username}]
         });
 
         if (existingUser) {
@@ -58,8 +55,8 @@ const registerUser = async (req, res) => {
         const newUser = await User.create({
             firstname,
             lastname,
-            username: username.toLowerCase(),
-            email: email.toLowerCase(),
+            username: username,
+            email: email,
             password
         });
 
@@ -70,7 +67,7 @@ const registerUser = async (req, res) => {
         const { accessToken, refreshToken } = await generateAccessRefreshToken(newUser._id);
         const user = await User.findById(newUser._id).select("-password -refreshToken");
 
-        console.log(accessToken, refreshToken);
+        console.log('AccessToken',accessToken,'refreshToken',refreshToken);
 
         const options = {
             httpOnly: true,
@@ -135,22 +132,22 @@ const loginUser = async (req, res) => {
 
 // Get current user
 const getcurrentUser = async (req, res) => {
-  try {
-    const user = req.user;
+    try {
+        const user = req.user;
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({
+            message: "User fetched successfully",
+            user,
+        });
+
+    } catch (error) {
+        console.error("Error fetching current user:", error.message);
+        res.status(500).json({ message: "Internal server error" });
     }
-
-    res.status(200).json({
-      message: "User fetched successfully",
-      user,
-    });
-
-  } catch (error) {
-    console.error("Error fetching current user:", error.message);
-    res.status(500).json({ message: "Internal server error" });
-  }
 };
 
 const logoutUser = async (req, res) => {
@@ -181,47 +178,47 @@ const logoutUser = async (req, res) => {
 
 // Refresh access token
 const refreshAccessToken = async (req, res) => {
-  try {
-    const incomingRefreshToken = req.cookies?.refreshToken;
-    
-    if (!incomingRefreshToken) {
-      return res.status(401).json({ message: "Token not found" });
+    try {
+        const incomingRefreshToken = req.cookies?.refreshToken;
+
+        if (!incomingRefreshToken) {
+            return res.status(401).json({ message: "Token not found" });
+        }
+
+        const decodedToken = jwt.verify(
+            incomingRefreshToken,
+            process.env.REFRESH_TOKEN_SECRET
+        );
+
+        const user = await User.findById(decodedToken._id);
+        if (!user) {
+            return res.status(401).json({ message: "Unauthorized user" });
+        }
+
+        if (incomingRefreshToken !== user.refreshToken) {
+            return res.status(401).json({ message: "Token expired or already used" });
+        }
+
+        const { accessToken, refreshToken: newRefreshToken } = await generateAccessandRefreshToken(user._id);
+
+        const options = {
+            httpOnly: true,
+            secure: false,
+        };
+
+        res.status(200)
+            .cookie("accessToken", accessToken, options)
+            .cookie("refreshToken", newRefreshToken, options)
+            .json({
+                message: "Access token refreshed",
+                accessToken,
+                refreshToken: newRefreshToken
+            });
+
+    } catch (error) {
+        console.error("Refresh token error:", error.message);
+        res.status(403).json({ message: "Invalid or expired refresh token" });
     }
-
-    const decodedToken = jwt.verify(
-      incomingRefreshToken,
-      process.env.REFRESH_TOKEN_SECRET
-    );
-
-    const user = await User.findById(decodedToken._id);
-    if (!user) {
-      return res.status(401).json({ message: "Unauthorized user" });
-    }
-
-    if (incomingRefreshToken !== user.refreshToken) {
-      return res.status(401).json({ message: "Token expired or already used" });
-    }
-
-    const { accessToken, refreshToken: newRefreshToken } = await generateAccessandRefreshToken(user._id);
-
-    const options = {
-      httpOnly: true,
-      secure: false,
-    };
-
-    res.status(200)
-      .cookie("accessToken", accessToken, options)
-      .cookie("refreshToken", newRefreshToken, options)
-      .json({
-        message: "Access token refreshed",
-        accessToken,
-        refreshToken: newRefreshToken
-      });
-
-  } catch (error) {
-    console.error("Refresh token error:", error.message);
-    res.status(403).json({ message: "Invalid or expired refresh token" });
-  }
 };
 
 
