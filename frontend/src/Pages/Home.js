@@ -5,11 +5,17 @@ import Sidebar from "../Components/Sidebar";
 
 
 
-
 const Home = (props) => {
 
     const loggedIn = props.loggedIn;
     const setLoggedIn = props.setLoggedIn;
+
+    // const [userInfo , setUserInfo] = useState({
+    //     username:'',
+    //     email:'',
+    //     image:'',
+    //     // interview:'',
+    // });
 
     const navigate = useNavigate();
 
@@ -27,6 +33,34 @@ const Home = (props) => {
         navigate('/practice')
     }
 
+    // const fetchUserInfo = async () =>{
+    //     try {
+    //         const res = await fetch(process.env.REACT_APP_BACKEND_URI + '/getUser',{
+    //             method: 'GET',
+    //             credentials: 'include',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //         });
+
+    //         const data = await res.json();
+
+    //         const user  = data.user;
+
+    //         setUserInfo({
+                
+    //             // interview:user.interview,
+    //         })
+
+    //         console.log(userInfo);
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // }
+
+    // useEffect(() => {
+    //     fetchUserInfo();
+    // },[]);
 
     return (
         <div className="flex w-[100%] min-h-screen relative gap-4 overflow-hidden">
