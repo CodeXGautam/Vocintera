@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import { registerUser, loginUser, refreshAccessToken, logoutUser, googleAuthCode } from './controllers/userController.js';
+import { registerUser, loginUser, refreshAccessToken, logoutUser,getCurrentUser, googleAuthCode } from './controllers/userController.js';
 import { verifyJwt } from './middleware/auth.middleware.js';
 
 const app = express();
@@ -27,6 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 app.post('/api/v1/register', registerUser);
 app.post('/api/v1/login', loginUser);
 app.post('/api/v1/refresh-token', refreshAccessToken);
+app.get('/api/v1/getUser',verifyJwt, getCurrentUser);
 app.get('/api/v1/logout',verifyJwt, logoutUser);
 app.post('/api/v1/auth/google-auth-code', googleAuthCode);
 
