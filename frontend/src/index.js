@@ -4,12 +4,15 @@ import './index.css';
 import { BrowserRouter } from 'react-router';
 import { Toaster } from 'react-hot-toast';
 import App from './App';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-    <BrowserRouter>
-        <App />
-        <Toaster />
-    </BrowserRouter>
+    <GoogleOAuthProvider clientId={process.env.REACT_APP_CLIENT_ID}>
+        <BrowserRouter>
+            <App />
+            <Toaster />
+        </BrowserRouter>
+    </GoogleOAuthProvider>
 );
 

@@ -60,7 +60,7 @@ const Home = (props) => {
 
                     <div className="flex justify-center items-center rounded-xl opacity-[0.4]">
                     <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRPRwgKrfySS9Kd6_0DSFB6ZyVgpmScXBVI0w&s"
-                      alt="interview image" className="w-[100%] rounded-xl"/>
+                      alt="interview" className="w-[100%] rounded-xl"/>
                     </div>
 
                 </div>
