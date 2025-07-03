@@ -138,7 +138,7 @@ const loginUser = async (req, res) => {
 };
 
 // Get current user
-const getcurrentUser = async (req, res) => {
+const getCurrentUser = async (req, res) => {
     try {
         const user = req.user;
 
@@ -263,7 +263,7 @@ const googleAuthCode = async (req, res) => {
 export {
     registerUser,
     loginUser,
-    getcurrentUser,
+    getCurrentUser,
     logoutUser,
     refreshAccessToken,
     googleAuthCode
