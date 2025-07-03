@@ -38,8 +38,6 @@ const Sidebar = (props) => {
 
             const user = data.user;
 
-            console.log(user)
-
             setUserInfo({
                 username: user.username,
                 email: user.email,
@@ -48,13 +46,12 @@ const Sidebar = (props) => {
             })
 
         } catch (error) {
-            console.log(error);
+            console.log("Error: ",error);
         }
     }
 
     useEffect(() => {
         fetchUserInfo();
-        console.log(userInfo);
     }, []);
 
 
@@ -104,6 +101,7 @@ const Sidebar = (props) => {
 
     return (
         <div className="">
+            {/* mobile view  sidebar */}
             <div className="menu w-[23%] min-w-[240px] fixed left-0 top-0 h-screen bg-slate-900 p-5 rounded-md flex flex-col
                justify-between items-center shadow-md shadow-blue-800 md:hidden lg:hidden xl:hidden 2xl:hidden
                transition-all duration-300 ease-in-out z-[1000]">
@@ -161,7 +159,8 @@ const Sidebar = (props) => {
                     Logout
                 </button>
             </div>
-
+            
+            {/* web view Sidebar */}
             <div className="w-[25%] min-w-[220px] h-screen bg-slate-900 p-5 rounded-md flex flex-col
                justify-between items-center shadow-md shadow-blue-800 hidden md:flex lg:flex xl:flex 2xl:flex
                transition-all duration-300 ease-in-out">
