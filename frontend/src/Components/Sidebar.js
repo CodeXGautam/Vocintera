@@ -7,6 +7,7 @@ import { DiCode } from "react-icons/di";
 import { SlCalender } from "react-icons/sl";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import { BsFillPersonFill } from "react-icons/bs";
 
 
 
@@ -39,7 +40,7 @@ const Sidebar = (props) => {
             const user = data.user;
 
             setUserInfo({
-                username: user.username,
+                username: user.firstname,
                 email: user.email,
                 image: user.avatar,
                 // interview:user.interview,
@@ -177,7 +178,13 @@ const Sidebar = (props) => {
                     </h1>
 
                     <div className="flex justify-start items-center gap-4">
-                        <span className="w-[40px] h-[40px] rounded-full bg-blue-700 shadow-md shadow-blue-500"></span>
+                        <span className="w-[40px] h-[40px] rounded-full bg-blue-700 shadow-md shadow-blue-500 justify-center 
+                        items-center">
+                        {
+                            userInfo.image ? null : <BsFillPersonFill/>
+                        }
+                        <img src={userInfo.image} alt="" className="w-[90%] rounded-full"/>
+                        </span>
                         {/* user's username */}
                         <span className="text-white font-semibold flex gap-2 justify-center"> Hi <span>{userInfo.username}</span></span>
 
