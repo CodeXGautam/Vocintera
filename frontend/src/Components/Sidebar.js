@@ -47,7 +47,7 @@ const Sidebar = (props) => {
             })
 
         } catch (error) {
-            console.log("Error: ",error);
+            console.log("Error: ", error);
         }
     }
 
@@ -131,7 +131,13 @@ const Sidebar = (props) => {
                     </div>
 
                     <div className="flex justify-start items-center gap-4">
-                        <span className="w-[40px] h-[40px] rounded-full bg-blue-700 shadow-md shadow-blue-500"></span>
+                       <span className="w-[50px] h-[50px] rounded-full bg-blue-700 shadow-md shadow-blue-500 flex items-center justify-center overflow-hidden">
+                            {userInfo.image ? (
+                                <img src={userInfo.image} alt="user avatar" className="w-full h-full object-cover rounded-full" />
+                            ) : (
+                                <BsFillPersonFill className="text-white text-3xl" />
+                            )}
+                        </span>
                         {/* user's firstname */}
                         <span className="text-white font-semibold flex gap-2 justify-center"> Hi <span>{userInfo.username}</span></span>
                     </div>
@@ -160,7 +166,7 @@ const Sidebar = (props) => {
                     Logout
                 </button>
             </div>
-            
+
             {/* web view Sidebar */}
             <div className="w-[25%] min-w-[220px] h-screen bg-slate-900 p-5 rounded-md flex flex-col
                justify-between items-center shadow-md shadow-blue-800 hidden md:flex lg:flex xl:flex 2xl:flex
@@ -178,16 +184,15 @@ const Sidebar = (props) => {
                     </h1>
 
                     <div className="flex justify-start items-center gap-4">
-                        <span className="w-[40px] h-[40px] rounded-full bg-blue-700 shadow-md shadow-blue-500 justify-center 
-                        items-center">
-                        {
-                            userInfo.image ? null : <BsFillPersonFill/>
-                        }
-                        <img src={userInfo.image} alt="" className="w-[90%] rounded-full"/>
+                        <span className="w-[50px] h-[50px] rounded-full bg-blue-700 shadow-md shadow-blue-500 flex items-center justify-center overflow-hidden">
+                            {userInfo.image ? (
+                                <img src={userInfo.image} alt="user avatar" className="w-full h-full object-cover rounded-full" />
+                            ) : (
+                                <BsFillPersonFill className="text-white text-3xl" />
+                            )}
                         </span>
                         {/* user's username */}
                         <span className="text-white font-semibold flex gap-2 justify-center"> Hi <span>{userInfo.username}</span></span>
-
                     </div>
 
 
