@@ -5,7 +5,7 @@ import { RiMenuUnfoldLine } from "react-icons/ri";
 import { NavLink, useNavigate } from 'react-router';
 import { DiCode } from "react-icons/di";
 import { SlCalender } from "react-icons/sl";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
 
@@ -15,6 +15,47 @@ const Sidebar = (props) => {
     const setLoggedIn = props.setLoggedIn;
 
     const [menuBar, setMenuBar] = useState(false);
+
+    const [userInfo, setUserInfo] = useState({
+        username: '',
+        email: '',
+        image: '',
+        // interview:'',
+    });
+
+
+    const fetchUserInfo = async () => {
+        try {
+            const res = await fetch(process.env.REACT_APP_BACKEND_URI + '/getUser', {
+                method: 'GET',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const data = await res.json();
+
+            const user = data.user;
+
+            console.log(user)
+
+            setUserInfo({
+                username: user.username,
+                email: user.email,
+                image: user.avatar,
+                // interview:user.interview,
+            })
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    useEffect(() => {
+        fetchUserInfo();
+        console.log(userInfo);
+    }, []);
 
 
     const navigate = useNavigate();
@@ -68,8 +109,6 @@ const Sidebar = (props) => {
                transition-all duration-300 ease-in-out z-[1000]">
                 <div className="flex flex-col gap-5 w-[100%]">
 
-
-
                     <div className="flex justify-between items-center w-[100%] mb-5">
 
                         <h1 className='text-[#b5b5b5a4] bg-clip-text animate-shine font-extrabold text-3xl flex
@@ -95,7 +134,7 @@ const Sidebar = (props) => {
                     <div className="flex justify-start items-center gap-4">
                         <span className="w-[40px] h-[40px] rounded-full bg-blue-700 shadow-md shadow-blue-500"></span>
                         {/* user's firstname */}
-                        <span className="text-white font-semibold"> Hi User</span>
+                        <span className="text-white font-semibold flex gap-2 justify-center"> Hi <span>{userInfo.username}</span></span>
                     </div>
 
                     <NavLink to='/home' className="flex justify-start items-center text-slate-300 hover:text-white
@@ -140,8 +179,9 @@ const Sidebar = (props) => {
 
                     <div className="flex justify-start items-center gap-4">
                         <span className="w-[40px] h-[40px] rounded-full bg-blue-700 shadow-md shadow-blue-500"></span>
-                        {/* user's firstname */}
-                        <span className="text-white font-semibold"> Hi User</span>
+                        {/* user's username */}
+                        <span className="text-white font-semibold flex gap-2 justify-center"> Hi <span>{userInfo.username}</span></span>
+
                     </div>
 
 
