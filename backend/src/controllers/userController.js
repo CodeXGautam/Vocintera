@@ -1,8 +1,13 @@
-import mongoose from 'mongoose';
 import User from '../models/user.model.js';
 import { OAuth2Client } from 'google-auth-library';
+import 'dotenv/config';
 
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+const client = new OAuth2Client(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    'postmessage'
+  );
 
 const generateAccessRefreshToken = async (userId) => {
     try {
@@ -223,50 +228,25 @@ const refreshAccessToken = async (req, res) => {
     }
 };
 
-const googleRegister = async (req, res) => {
-    const { credential } = req.body;
+const googleAuthCode = async (req, res) => {
+    const { code } = req.body;
     try {
+        const { tokens } = await client.getToken(code);
         const ticket = await client.verifyIdToken({
-            idToken: credential,
-            audience: process.env.GOOGLE_CLIENT_ID,
-        });
-        const payload = ticket.getPayload();
-
-        let user = await User.findOne({ email: payload.email });
-        if (user) {
-            return res.status(400).json({ message: "User already exists" });
-        }
-        user = await User.create({
-            firstname: payload.given_name || "",
-            lastname: payload.family_name || "",
-            username: payload.email, // or generate a username
-            email: payload.email,
-            password: process.env.DEFAULT_GOOGLE_USER_PASSWORD || "google-oauth", // dummy password
-            avatar: payload.picture || null
-        });
-        const { accessToken, refreshToken } = await generateAccessRefreshToken(user._id);
-        const options = { httpOnly: true, secure: false };
-        res.status(201)
-            .cookie("accessToken", accessToken, options)
-            .cookie("refreshToken", refreshToken, options)
-            .json({ user, message: "Google registration successful" });
-    } catch (err) {
-        console.error(err);
-        res.status(401).json({ message: "Invalid Google token" });
-    }
-};
-
-const googleLogin = async (req, res) => {
-    const { credential } = req.body;
-    try {
-        const ticket = await client.verifyIdToken({
-            idToken: credential,
+            idToken: tokens.id_token,
             audience: process.env.GOOGLE_CLIENT_ID,
         });
         const payload = ticket.getPayload();
         let user = await User.findOne({ email: payload.email });
         if (!user) {
-            return res.status(404).json({ message: "User not found. Please register first." });
+            user = await User.create({
+                firstname: payload.given_name || "",
+                lastname: payload.family_name || "",
+                username: payload.email,
+                email: payload.email,
+                password: process.env.DEFAULT_GOOGLE_USER_PASSWORD || "google-oauth",
+                avatar: payload.picture || null
+            });
         }
         const { accessToken, refreshToken } = await generateAccessRefreshToken(user._id);
         const options = { httpOnly: true, secure: false };
@@ -276,7 +256,7 @@ const googleLogin = async (req, res) => {
             .json({ user, message: "Google login successful" });
     } catch (err) {
         console.error(err);
-        res.status(401).json({ message: "Invalid Google token" });
+        res.status(401).json({ message: "Invalid Google code" });
     }
 };
 
@@ -286,6 +266,5 @@ export {
     getcurrentUser,
     logoutUser,
     refreshAccessToken,
-    googleRegister,
-    googleLogin
+    googleAuthCode
 };

@@ -7,6 +7,7 @@ import BlurText from "../Components/BlurText";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import { toast } from "react-hot-toast";
+import { useGoogleLogin } from '@react-oauth/google';
 
 const RegisterPage = (props) => {
 
@@ -136,6 +137,33 @@ const RegisterPage = (props) => {
         setShowConfirmPassword(!showconfirmPassword)
     }
 
+    const googleLogin = useGoogleLogin({
+        flow: 'auth-code',
+        onSuccess: async ({ code }) => {
+            try {
+                const res = await fetch(process.env.REACT_APP_BACKEND_URI + '/auth/google-auth-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ code })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    setLoggedIn(true);
+                    toast.success("Account Created with Google!");
+                    navigate('/home');
+                } else {
+                    toast.error(data.message || "Google registration failed");
+                }
+            } catch (err) {
+                toast.error("Google registration failed");
+            }
+        },
+        onError: () => {
+            toast.error('Google Sign Up Failed');
+        }
+    });
+
     return (
         <div className="flex flex-col">
             <Navbar loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
@@ -222,8 +250,11 @@ const RegisterPage = (props) => {
                         <span className="w-[100%] h-[1px] bg-slate-800"></span>
                     </div>
 
-                    <div className="bg-blue-950 p-4 rounded-xl flex justify-center cursor-pointer items-center gap-4 text-gray-200 
-                hover:bg-blue-800 transition-all duration-200 hover:scale-[1.05] hover:text-gray-100 shadow-lg shadow-blue-500">
+                    <div
+                        className="bg-blue-950 p-4 rounded-xl flex justify-center cursor-pointer items-center gap-4 text-gray-200 \
+                        hover:bg-blue-800 transition-all duration-200 hover:scale-[1.05] hover:text-gray-100 shadow-lg shadow-blue-500"
+                        onClick={() => googleLogin()}
+                    >
                         Sign Up with Google <FcGoogle />
                     </div>
                 </form>

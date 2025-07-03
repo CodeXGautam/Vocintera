@@ -6,6 +6,7 @@ import { FaRegEyeSlash } from "react-icons/fa";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import toast from "react-hot-toast";
+import { useGoogleLogin } from '@react-oauth/google';
 
 
 const LoginPage = (props) => {
@@ -75,9 +76,32 @@ const LoginPage = (props) => {
      }
    }
 
-   const googleHandler = () => {
-      console.log("google login button");
-   }
+   const googleLogin = useGoogleLogin({
+      flow: 'auth-code',
+      onSuccess: async ({ code }) => {
+         try {
+            const res = await fetch(process.env.REACT_APP_BACKEND_URI + '/auth/google-auth-code', {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               credentials: 'include',
+               body: JSON.stringify({ code })
+            });
+            const data = await res.json();
+            if (res.ok) {
+               setLoggedIn(true);
+               toast.success("Logged in with Google!");
+               navigate('/home');
+            } else {
+               toast.error(data.message || "Google login failed");
+            }
+         } catch (err) {
+            toast.error("Google login failed");
+         }
+      },
+      onError: () => {
+         toast.error('Google Login Failed');
+      }
+   });
 
    return (
       <div className="flex flex-col">
@@ -133,10 +157,11 @@ const LoginPage = (props) => {
                   <span className="w-[100%] h-[1px] bg-slate-800"></span>
                </div>
 
-               <div className="bg-blue-950 p-4 rounded-xl flex justify-center cursor-pointer items-center gap-4 text-gray-200 
-                hover:bg-blue-800 transition-all duration-200 hover:scale-[1.05] hover:text-gray-100 shadow-lg shadow-blue-500"
-                  onClick={googleHandler}>
-
+               <div
+                  className="bg-blue-950 p-4 rounded-xl flex justify-center cursor-pointer items-center gap-4 text-gray-200 \
+                     hover:bg-blue-800 transition-all duration-200 hover:scale-[1.05] hover:text-gray-100 shadow-lg shadow-blue-500"
+                  onClick={() => googleLogin()}
+               >
                   Log In with Google <FcGoogle />
                </div>
             </form>
