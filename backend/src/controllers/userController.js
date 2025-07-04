@@ -265,7 +265,7 @@ const googleAuthCode = async (req, res) => {
 
 const getInterviewInfo = async (req, res) =>{
     try {
-        const info = User.aggregate([
+        const info = await User.aggregate([
             {
                 $match: {
                     _id: new mongoose.Types.ObjectId(req.user._id)

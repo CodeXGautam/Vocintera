@@ -12,6 +12,7 @@ const interviewSchema = new mongoose.Schema({
     },
     time : {
         type : Date,
+        trim:true,
         required : true
     },
     resume : {
@@ -23,7 +24,7 @@ const interviewSchema = new mongoose.Schema({
         default: "false"
     },
     performance : [
-        
+
     ]
 })
 

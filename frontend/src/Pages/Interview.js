@@ -87,15 +87,11 @@ const Interview = (props) => {
                 credentials: "include",
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem('token')
                 }
             })
             const data = await response.json();
-            setInterviews({
-                role: data.role,
-                time: data.time,
-                resume: data.resume
-            });
+            // Expecting data.interviews to be an array
+            setInterviews(Array.isArray(data.interviews) ? data.interviews : []);
         } catch (error) {
             console.log("Error : ", error);
         }
@@ -182,11 +178,11 @@ const Interview = (props) => {
                   border-2 cursor-pointer border-gray-800 rounded-xl bg-slate-900 p-3" value={formData.role}
 
                                     onChange={changeHandler}>
-                                    <option value="software developer">Software Developer</option>
-                                    <option value="software tester">Product Management</option>
-                                    <option value="manager">Data Scientist</option>
-                                    <option value="data scientist">ML Engineer</option>
-                                    <option value="data analyst">Data Analyst</option>
+                                    <option value="Software Developer">Software Developer</option>
+                                    <option value="Product Management">Product Management</option>
+                                    <option value="Data Scientist">Data Scientist</option>
+                                    <option value="ML Engineer">ML Engineer</option>
+                                    <option value="Data Analyst">Data Analyst</option>
                                 </select>
                             </label>
 
