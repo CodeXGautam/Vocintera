@@ -4,6 +4,7 @@ import Sidebar from "../Components/Sidebar";
 import toast from "react-hot-toast";
 
 
+
 const Interview = (props) => {
 
     const loggedIn = props.loggedIn;
@@ -39,7 +40,6 @@ const Interview = (props) => {
                 credentials: "include",
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem('token')
                 },
                 body: JSON.stringify(formData)
             })
@@ -101,14 +101,14 @@ const Interview = (props) => {
             <div className="w-[100%] max-h-screen bg-slate-900 flex flex-col gap-8 transition-all
             duration-300 ease-in-out rounded-md shadow-md shadow-blue-500 p-5 overflow-y-scroll">
 
-                <div className="flex flex-col gap-5">
-                    <div className="flex flex-col min-h-[350px] rounded-xl p-4
+                <div className="flex flex-col gap-10">
+                    <div className="flex flex-col min-h-screen rounded-xl p-4
                       border border-blue-950 gap-5">
-
-                        <h2 className="flex justify-center items-center font-semibold text-slate-400 
+                
+                        <h2 className="flex justify-center items-center font-semibold text-blue-800 
                     text-3xl">
                             Your Interviews
-                        </h2>
+                        </h2>        
 
                         {
                             interviews && interviews.length > 0 ? (
@@ -143,8 +143,16 @@ const Interview = (props) => {
                                     }
                                 </div>
                             ) : (
-                                <div className="flex w-[100%] h-[100%] justify-center items-center text-md text-slate-300 font-semibold">
+                                <div className="flex flex-col gap-4 w-[100%] h-[100%] justify-center items-center text-md text-slate-300 font-semibold">
                                     You have no interviews scheduled currently
+                                    <button className="bg-blue-950 p-4 rounded-xl flex justify-center items-center text-gray-300 text-sm
+                                        rounded-md hover:bg-blue-800 hover:scale-[1.05] transition-all duration-300
+                                        shadow-md shadow-blue-700"
+                                        onClick={() => {
+                                            document.getElementById("schedule").scrollIntoView({ behavior: "smooth" });
+                                        }}>
+                                        Schedule an Interview
+                                    </button>
                                 </div>
                             )
                         }
@@ -152,14 +160,15 @@ const Interview = (props) => {
 
                     </div>
 
-                    <div className="flex flex-col gap-8 items-center">
-                        <h1 className="flex text-slate-300 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold text-center">Schedule an Interview</h1>
+                    <div className="flex flex-col gap-8 items-center mt-5" id="schedule">
+                        <h1 className="flex text-blue-800 text-xl sm:text-2xl md:text-3xl lg:text-4xl
+                         font-semibold text-center">Schedule An Interview</h1>
                         <form className='flex flex-col gap-5 border-2 shadow-md shadow-blue-900 w-[70%] max-w-[600px]
             border-slate-900 p-10 rounded-xl min-w-[300px]' onSubmit={submitHandler}>
 
                             <label htmlFor="role" className="text-gray-300 flex flex-col gap-2 w-[100%]">Role *
                                 <select name="role" id="role" className="flex justify-center text-gray-300 text-sm items-center 
-                  border-2 border-gray-800 rounded-xl bg-slate-900 p-3" value={formData.role}
+                  border-2 cursor-pointer border-gray-800 rounded-xl bg-slate-900 p-3" value={formData.role}
 
                                     onChange={changeHandler}>
                                     <option value="software developer">Software Developer</option>
@@ -173,13 +182,15 @@ const Interview = (props) => {
 
                             <label htmlFor="time" className="text-gray-300 flex flex-col gap-2 w-[100%]">Time *
                                 <input type="date" value={formData.time} id="time" name="time"
-                                    className="flex justify-center text-gray-300 text-sm items-center border-2 border-gray-800 rounded-xl bg-slate-900 p-3"
+                                    className="flex justify-center text-gray-300 text-sm items-center border-2 border-gray-800 
+                                    cursor-pointer rounded-xl bg-slate-900 p-3"
                                     onChange={changeHandler} />
                             </label>
 
                             <label htmlFor="resume" className="text-gray-300 flex flex-col gap-2 w-[100%]">Resume *
                                 <input type="file" value={formData.resume} id="resume" name="resume"
-                                    className="flex justify-center text-gray-300 text-sm items-center border-2 border-gray-800 rounded-xl bg-slate-900 p-3"
+                                    className="flex justify-center text-gray-300 text-sm items-center border-2 border-gray-800
+                                    cursor-pointer rounded-xl bg-slate-900 p-3"
                                     onChange={changeHandler} />
                             </label>
 
