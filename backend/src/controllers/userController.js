@@ -1,6 +1,9 @@
+import mongoose from 'mongoose';
 import User from '../models/user.model.js';
 import { OAuth2Client } from 'google-auth-library';
 import 'dotenv/config';
+import cloudinary from "cloudinary";
+import fs from "fs";
 
 
 const client = new OAuth2Client(
@@ -260,11 +263,99 @@ const googleAuthCode = async (req, res) => {
     }
 };
 
+const getInterviewInfo = async (req, res) =>{
+    try {
+        const info = User.aggregate([
+            {
+                $match: {
+                    _id: new mongoose.Types.ObjectId(req.user._id)
+                }
+            },
+            {
+                $lookup: {
+                    from: "interviews",
+                    localField: "_id",
+                    foreignField: "candidate",
+                    as: "interviews"
+                }
+            },
+            {
+                $project: {
+                    interviews:1,
+                    _id: 0
+                }
+            }           
+        ]);
+
+        res.status(200)
+        .json({interviews: info[0]?.interviews || []})
+        
+    } catch (error) {
+        console.log("Error",error);
+        res.status(500)
+        .json({
+            message:"Failed to fetch interview info"
+        })
+    }
+}
+
+cloudinary.v2.config({
+    cloud_name: process.env.CLOUDINARY_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// Resume upload controller
+const uploadResume = async (req, res, next) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: "No file uploaded" });
+        }
+        const result = await cloudinary.v2.uploader.upload(req.file.path, {
+            resource_type: "auto",
+            folder: "resumes"
+        });
+        fs.unlinkSync(req.file.path);
+        req.resumeUrl = result.secure_url;
+        next();
+    } catch (error) {
+        console.error("Resume upload error:", error);
+        res.status(500).json({ message: "Failed to upload resume" });
+    }
+};
+
+const uploadAvatar = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: "No file uploaded" });
+        }
+        const result = await cloudinary.v2.uploader.upload(req.file.path, {
+            folder: "avatars",
+            resource_type: "image"
+        });
+        fs.unlinkSync(req.file.path);
+        const user = await User.findByIdAndUpdate(
+            req.user._id,
+            { image: result.secure_url },
+            { new: true }
+        );
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        res.status(200).json({ message: "Avatar uploaded successfully", avatarUrl: result.secure_url });
+    } catch (error) {
+        res.status(500).json({ message: "Avatar upload failed", error: error.message });
+    }
+};
+
 export {
     registerUser,
     loginUser,
     getCurrentUser,
     logoutUser,
     refreshAccessToken,
-    googleAuthCode
+    googleAuthCode,
+    getInterviewInfo,
+    uploadResume,
+    uploadAvatar
 };

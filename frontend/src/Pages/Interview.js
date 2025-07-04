@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Footer from "../Components/Footer";
 import Sidebar from "../Components/Sidebar";
 import toast from "react-hot-toast";
@@ -17,14 +17,21 @@ const Interview = (props) => {
     const [formData, setFormData] = useState({
         role: "",
         time: "",
-        resume: ""
+        resume: null
     })
 
     const changeHandler = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        })
+        if (e.target.name === "resume") {
+            setFormData({
+                ...formData,
+                resume: e.target.files[0]
+            })
+        } else {
+            setFormData({
+                ...formData,
+                [e.target.name]: e.target.value
+            })
+        }
     }
 
     const submitHandler = async (e) => {
@@ -34,14 +41,14 @@ const Interview = (props) => {
                 toast.error("All fields are required");
                 return;
             }
-
+            const dataToSend = new FormData();
+            dataToSend.append("role", formData.role);
+            dataToSend.append("time", formData.time);
+            dataToSend.append("resume", formData.resume);
             const response = await fetch(process.env.REACT_APP_BACKEND_URI + '/createInterview', {
                 method: "POST",
                 credentials: "include",
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData)
+                body: dataToSend
             })
             const data = await response.json();
             if (data.message === "Interview not created") {
@@ -61,7 +68,7 @@ const Interview = (props) => {
                 setFormData({
                     role: "",
                     time: "",
-                    resume: ""
+                    resume: null
                 });
                 getInterviewInfo();
             }
@@ -75,7 +82,7 @@ const Interview = (props) => {
 
     const getInterviewInfo = async () => {
         try {
-            const response = await fetch(process.env.REACT_APP_BACKEND_URI + '/getInterview', {
+            const response = await fetch(process.env.REACT_APP_BACKEND_URI + '/getInterviewInfo', {
                 method: "GET",
                 credentials: "include",
                 headers: {
@@ -93,6 +100,10 @@ const Interview = (props) => {
             console.log("Error : ", error);
         }
     }
+
+    useEffect(()=>{
+        getInterviewInfo();
+    },[])
 
     return (
         <div className="flex w-[100%] relative gap-4 overflow-hidden">
@@ -188,7 +199,7 @@ const Interview = (props) => {
                             </label>
 
                             <label htmlFor="resume" className="text-gray-300 flex flex-col gap-2 w-[100%]">Resume *
-                                <input type="file" value={formData.resume} id="resume" name="resume"
+                                <input type="file" id="resume" name="resume"
                                     className="flex justify-center text-gray-300 text-sm items-center border-2 border-gray-800
                                     cursor-pointer rounded-xl bg-slate-900 p-3"
                                     onChange={changeHandler} />
