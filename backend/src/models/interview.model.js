@@ -17,7 +17,14 @@ const interviewSchema = new mongoose.Schema({
     resume : {
         type : String,//url from cloudinary
         required : true
-    }
+    },
+    status : {
+        type : Boolean,
+        default: "false"
+    },
+    performance : [
+        
+    ]
 })
 
 const Interview = mongoose.model("Interview",interviewSchema);

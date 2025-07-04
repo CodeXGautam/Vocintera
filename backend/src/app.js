@@ -31,6 +31,6 @@ app.post('/api/v1/refresh-token', refreshAccessToken);
 app.get('/api/v1/getUser',verifyJwt, getCurrentUser);
 app.get('/api/v1/logout',verifyJwt, logoutUser);
 app.post('/api/v1/auth/google-auth-code', googleAuthCode);
-app.post('/api/v1/interview',verifyJwt, createInterview);
+app.post('/api/v1/createInterview',verifyJwt, createInterview);
 
 export default app;

@@ -3,7 +3,6 @@ import User from '../models/user.model.js';
 
 export const verifyJwt = async (req, res, next) => {
     try {
-        console.log(req.cookies.accessToken)
         const token = req.cookies?.accessToken;
 
         if (!token || typeof token !== "string") {
