@@ -1,9 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import { registerUser, loginUser, refreshAccessToken, logoutUser,getCurrentUser, googleAuthCode } from './controllers/userController.js';
+import { registerUser, loginUser, refreshAccessToken, logoutUser,getCurrentUser, googleAuthCode, getInterviewInfo } from './controllers/userController.js';
 import { verifyJwt } from './middleware/auth.middleware.js';
 import { createInterview } from './controllers/interviewController.js';
+import { uploadResume, uploadAvatar } from './controllers/userController.js';
+import { upload } from './middleware/multer.js';
 
 const app = express();
 
@@ -31,6 +33,8 @@ app.post('/api/v1/refresh-token', refreshAccessToken);
 app.get('/api/v1/getUser',verifyJwt, getCurrentUser);
 app.get('/api/v1/logout',verifyJwt, logoutUser);
 app.post('/api/v1/auth/google-auth-code', googleAuthCode);
-app.post('/api/v1/createInterview',verifyJwt, createInterview);
+app.post('/api/v1/createInterview', verifyJwt, upload.single('resume'), uploadResume, createInterview);
+app.post('/api/v1/uploadAvatar', verifyJwt, upload.single('avatar'), uploadAvatar);
+app.get('/api/v1/getInterviewInfo',verifyJwt, getInterviewInfo);
 
 export default app;
