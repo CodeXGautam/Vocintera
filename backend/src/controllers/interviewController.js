@@ -1,4 +1,5 @@
 import Interview from "../models/interview.model.js";
+import User from "../models/user.model.js";
 
 const createInterview = async (req, res) =>{
     try{
@@ -29,6 +30,12 @@ const createInterview = async (req, res) =>{
                 message: "Interview not created"
             })
         }
+        await User.findByIdAndUpdate(
+            req.user._id,
+            { $push: { interviews: newInterview._id } },
+            { new: true }
+        );
+
         const interview = await Interview.findOne({candidate}).select("-candidate");
         return res.status(201).json({
             message: "Interview created successfully",

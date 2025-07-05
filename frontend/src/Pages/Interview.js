@@ -36,6 +36,7 @@ const Interview = (props) => {
 
     const submitHandler = async (e) => {
         e.preventDefault();
+        console.log(formData);
         try {
             if (!formData.role || !formData.time || !formData.resume) {
                 toast.error("All fields are required");
@@ -176,13 +177,13 @@ const Interview = (props) => {
                             <label htmlFor="role" className="text-gray-300 flex flex-col gap-2 w-[100%]">Role *
                                 <select name="role" id="role" className="flex justify-center text-gray-300 text-sm items-center 
                   border-2 cursor-pointer border-gray-800 rounded-xl bg-slate-900 p-3" value={formData.role}
-
+                                  
                                     onChange={changeHandler}>
-                                    <option value="Software Developer">Software Developer</option>
-                                    <option value="Product Management">Product Management</option>
-                                    <option value="Data Scientist">Data Scientist</option>
-                                    <option value="ML Engineer">ML Engineer</option>
-                                    <option value="Data Analyst">Data Analyst</option>
+                                    <option name='role' value="Software Developer">Software Developer</option>
+                                    <option name='role' value="Product Management">Product Management</option>
+                                    <option name='role' value="Data Scientist">Data Scientist</option>
+                                    <option name='role' value="ML Engineer">ML Engineer</option>
+                                    <option name='role' value="Data Analyst">Data Analyst</option>
                                 </select>
                             </label>
 
