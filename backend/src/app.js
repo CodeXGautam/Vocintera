@@ -26,7 +26,6 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
 app.post('/api/v1/register', registerUser);
 app.post('/api/v1/login', loginUser);
 app.post('/api/v1/refresh-token', refreshAccessToken);

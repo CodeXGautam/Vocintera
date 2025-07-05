@@ -9,13 +9,12 @@ const __dirname = path.dirname(__filename);
 // Explicitly load the .env file from src
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
-
 import connectDB from '../src/db/db.js';
 import  app  from './app.js';
 
 
 connectDB()
-.then(()=>{
+.then(async()=>{
     app.listen(process.env.PORT||4000, ()=>{
         console.log(`Server is running at port : ${process.env.PORT||4000}`);
     })
