@@ -1,18 +1,54 @@
-import { Routes, Route } from 'react-router';
+import { Routes, Route, useNavigate } from 'react-router';
 import LandingPage from './Pages/LandingPage';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import RegisterPage from './Pages/RegisterPage';
 import LoginPage from './Pages/LoginPage';
 import Home from './Pages/Home';
 import Practice from './Pages/Practice';
 import Interview from './Pages/Interview';
 import Settings from './Pages/Settings';
+import toast from 'react-hot-toast';
 
 
 const App = () => {
 
   const [loggedIn, setLoggedIn] = useState(false);
+  const navigate = useNavigate();
 
+  const refreshToken = async () => {
+    try {
+      const res = await fetch(process.env.REACT_APP_BACKEND_URI + '/refresh-token', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      const data = await res.json();
+      if (data.message === "Token not found" || data.message === "Unauthorized user" || data.message === "Token expired or already used") {
+        console.log(data.message);
+        setLoggedIn(false);
+        return;
+      }
+      if (data.message === "Access token refreshed") {
+        console.log("access token refreshed");
+        setLoggedIn(true);
+        toast.success("Logged In");
+        navigate('/home');
+      }
+      else {
+        console.log("Error: ", data.message)
+      }
+
+    } catch (err) {
+      console.log("Refreshing token failed");
+      setLoggedIn(false);
+    }
+  }
+
+  useEffect(() => {
+    refreshToken();
+  }, []);
 
 
   return (
