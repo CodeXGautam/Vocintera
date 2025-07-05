@@ -125,7 +125,6 @@ const RegisterPage = (props) => {
         }
     }
 
-
     const [showpassword, setShowPassword] = useState(false);
     const [showconfirmPassword, setShowConfirmPassword] = useState(false);
 

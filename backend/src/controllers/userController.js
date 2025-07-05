@@ -4,6 +4,7 @@ import { OAuth2Client } from 'google-auth-library';
 import 'dotenv/config';
 import cloudinary from "cloudinary";
 import fs from "fs";
+import jwt from "jsonwebtoken";
 
 
 const client = new OAuth2Client(
@@ -209,7 +210,7 @@ const refreshAccessToken = async (req, res) => {
             return res.status(401).json({ message: "Token expired or already used" });
         }
 
-        const { accessToken, refreshToken: newRefreshToken } = await generateAccessandRefreshToken(user._id);
+        const { accessToken, refreshToken: newRefreshToken } = await generateAccessRefreshToken(user._id);
 
         const options = {
             httpOnly: true,
@@ -224,7 +225,6 @@ const refreshAccessToken = async (req, res) => {
                 accessToken,
                 refreshToken: newRefreshToken
             });
-
     } catch (error) {
         console.error("Refresh token error:", error.message);
         res.status(403).json({ message: "Invalid or expired refresh token" });
