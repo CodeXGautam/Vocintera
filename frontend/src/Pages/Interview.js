@@ -122,7 +122,7 @@ const Interview = (props) => {
                             interviews && interviews.length > 0 ? (
                                 <div className="w-[100%] flex flex-col gap-5">
                                     {
-                                        interviews.map((interview, idx) => {
+                                        interviews.map((interview,idx) => {
                                             return (
                                                 <div className="flex justify-between w-[100%] border-2 border-blue-900 p-4 rounded-xl" key={idx}>
                                                     <div className="flex flex-col gap-2 items-start">
