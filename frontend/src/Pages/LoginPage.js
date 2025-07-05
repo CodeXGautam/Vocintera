@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState ,useEffect } from "react";
 import { NavLink, useNavigate } from 'react-router';
 import { FcGoogle } from "react-icons/fc";
 import { FaRegEye } from "react-icons/fa";
@@ -17,6 +17,10 @@ const LoginPage = (props) => {
    const setLoggedIn = props.setLoggedIn;
 
    const [showpassword, setShowPassword] = useState(false);
+
+   const autohome = () =>{
+      navigate('/home');
+   }
 
    const [formData, setFormData] = useState({
       email: '',
@@ -102,6 +106,11 @@ const LoginPage = (props) => {
          toast.error('Google Login Failed');
       }
    });
+
+   useEffect(()=>{
+      autohome();
+   },[])
+
 
    return (
       <div className="flex flex-col">

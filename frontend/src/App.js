@@ -1,4 +1,4 @@
-import { Routes, Route, useNavigate } from 'react-router';
+import { Routes, Route} from 'react-router';
 import LandingPage from './Pages/LandingPage';
 import { useState, useEffect } from 'react';
 import RegisterPage from './Pages/RegisterPage';
@@ -7,13 +7,12 @@ import Home from './Pages/Home';
 import Practice from './Pages/Practice';
 import Interview from './Pages/Interview';
 import Settings from './Pages/Settings';
-import toast from 'react-hot-toast';
+import InterviewRoom from './Pages/InterviewRoom';
 
 
 const App = () => {
 
   const [loggedIn, setLoggedIn] = useState(false);
-  const navigate = useNavigate();
 
   const refreshToken = async () => {
     try {
@@ -33,8 +32,6 @@ const App = () => {
       if (data.message === "Access token refreshed") {
         console.log("access token refreshed");
         setLoggedIn(true);
-        toast.success("Logged In");
-        navigate('/home');
       }
       else {
         console.log("Error: ", data.message)
@@ -44,7 +41,7 @@ const App = () => {
       console.log("Refreshing token failed");
       setLoggedIn(false);
     }
-  }
+  };
 
   useEffect(() => {
     refreshToken();
@@ -73,6 +70,10 @@ const App = () => {
         {
           loggedIn &&
           <Route path='/settings' element={<Settings loggedIn={loggedIn} setLoggedIn={setLoggedIn} />} />
+        }
+        {
+          loggedIn &&
+          <Route path='/interviewroom' element={<InterviewRoom />} />
         }
       </Routes>
     </div>
