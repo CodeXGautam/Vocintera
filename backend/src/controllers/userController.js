@@ -313,7 +313,9 @@ const uploadResume = async (req, res, next) => {
         }
         const result = await cloudinary.v2.uploader.upload(req.file.path, {
             resource_type: "auto",
-            folder: "resumes"
+            folder: "resumes",
+            secure: true,
+            max_size: 2* 1024 * 1024, // 2MB
         });
         fs.unlinkSync(req.file.path);
         req.resumeUrl = result.secure_url;
@@ -331,7 +333,9 @@ const uploadAvatar = async (req, res) => {
         }
         const result = await cloudinary.v2.uploader.upload(req.file.path, {
             folder: "avatars",
-            resource_type: "image"
+            resource_type: "image",
+            secure: true,
+            max_size: 5* 1024 * 1024, // 10MB
         });
         fs.unlinkSync(req.file.path);
         const user = await User.findByIdAndUpdate(
