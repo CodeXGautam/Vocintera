@@ -44,21 +44,21 @@ const Navbar = (props) => {
             <div className='flex gap-8 text-md items-center text-gray-200'>
                 {
                     !loggedIn &&
-                    <NavLink to='/product' className='hover:bg-gray-900 p-2 rounded-xl'>
+                    <NavLink to='/product' className='hover:bg-gray-900 p-2 rounded-xl hidden md:flex lg:flex xl:flex 2xl:flex'>
                         Product
                     </NavLink>
                 }
 
                 {
                     !loggedIn &&
-                    <NavLink to='/pricing' className='hover:bg-gray-900 p-2 rounded-xl'>
+                    <NavLink to='/pricing' className='hover:bg-gray-900 p-2 rounded-xl hidden md:flex lg:flex xl:flex 2xl:flex'>
                         Pricing
                     </NavLink>
                 }
 
                 {
                     !loggedIn &&
-                    <NavLink to='/resources' className='hover:bg-gray-900 p-2 rounded-xl'>
+                    <NavLink to='/resources' className='hover:bg-gray-900 p-2 rounded-xl hidden md:flex lg:flex xl:flex 2xl:flex'>
                         Resources
                     </NavLink>
                 }
@@ -82,7 +82,7 @@ const Navbar = (props) => {
 
                 {
                     loggedIn &&
-                    <NavLink to='/practice' className='hover:bg-gray-900 p-2 rounded-xl'>
+                    <NavLink to='/practice' className='hover:bg-gray-900 p-2 rounded-xl hidden md:flex lg:flex xl:flex 2xl:flex'>
                       Practice
                     </NavLink>
                 }
