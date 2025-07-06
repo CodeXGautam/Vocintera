@@ -8,6 +8,7 @@ import Practice from './Pages/Practice';
 import Interview from './Pages/Interview';
 import Settings from './Pages/Settings';
 import InterviewRoom from './Pages/InterviewRoom';
+import EvaluationDetail from './Pages/EvaluationDetail';
 
 
 const App = () => {
@@ -74,6 +75,10 @@ const App = () => {
         {
           loggedIn &&
           <Route path='/interviewroom/:interviewId' element={<InterviewRoom />} />
+        }
+        {
+          loggedIn &&
+          <Route path='/evaluation/:interviewId' element={<EvaluationDetail loggedIn={loggedIn} setLoggedIn={setLoggedIn} />} />
         }
       </Routes>
     </div>
