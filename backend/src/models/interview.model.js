@@ -31,6 +31,47 @@ const interviewSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    evaluation: {
+        overallScore: Number,
+        communication: {
+            score: Number,
+            feedback: String,
+            strengths: [String],
+            improvements: [String]
+        },
+        technicalKnowledge: {
+            score: Number,
+            feedback: String,
+            strengths: [String],
+            improvements: [String]
+        },
+        problemSolving: {
+            score: Number,
+            feedback: String,
+            strengths: [String],
+            improvements: [String]
+        },
+        experience: {
+            score: Number,
+            feedback: String,
+            strengths: [String],
+            improvements: [String]
+        },
+        culturalFit: {
+            score: Number,
+            feedback: String,
+            strengths: [String],
+            improvements: [String]
+        },
+        recommendation: String,
+        keyStrengths: [String],
+        areasForImprovement: [String],
+        nextSteps: String
+    },
+    evaluatedAt: {
+        type: Date,
+        default: null
+    },
     qa: [
         {
             question: String,
