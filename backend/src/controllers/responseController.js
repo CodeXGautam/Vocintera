@@ -1,8 +1,54 @@
 import Interview from "../models/interview.model.js";
 import User from "../models/user.model.js";
 import {GoogleGenAI} from '@google/genai';
+import fetch from 'node-fetch';
 
 const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY);
+
+
+
+// Function to get response from OpenRouter
+const getOpenRouterResponse = async (prompt) => {
+  try {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'http://localhost:3000',
+        'X-Title': 'Vocintera Interview App'
+      },
+              body: JSON.stringify({
+          model: process.env.OPENROUTER_MODEL || 'mistralai/mistral-small-3.2-24b-instruct:free',
+          messages: [
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          max_tokens: 150,
+          temperature: 0.7
+        })
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenRouter API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('OpenRouter API Response:', JSON.stringify(data, null, 2));
+    
+    if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
+      console.error('OpenRouter API returned invalid response structure:', data);
+      throw new Error('Invalid response structure from OpenRouter API');
+    }
+    
+    return data.choices[0].message.content;
+  } catch (error) {
+    console.error('OpenRouter API Error:', error);
+    throw error;
+  }
+};
 
 // Function to get resume information for the prompt
 const getResumeContext = (resumeUrl, role) => {
@@ -17,8 +63,15 @@ const formatResponse = (text) => {
   // Remove common AI prefixes/suffixes
   formatted = formatted.replace(/^(AI|Interviewer|Assistant):\s*/i, '');
   
-  // Remove unnecessary phrases but be more careful
-  formatted = formatted.replace(/\b(Now,|So,|Well,)\s*/gi, '');
+  // Remove reasoning and explanations - keep only the question
+  formatted = formatted.replace(/^(Got it!|I see|That's great!|Interesting!|Based on what you've shared,|Since you mentioned,|Given your experience,|Looking at your background,|Since the candidate just started sharing about their experience with|though the response was cut off,|here's a simple follow-up question to keep the conversation flowing naturally:)\s*/gi, '');
+  
+  // Remove any text that looks like internal reasoning
+  formatted = formatted.replace(/\*\*[^*]+\*\*/g, ''); // Remove bold text (often used for emphasis)
+  formatted = formatted.replace(/\[[^\]]+\]/g, ''); // Remove bracketed text
+  
+  // Remove unnecessary phrases
+  formatted = formatted.replace(/\b(Now,|So,|Well,|Let me ask,|I'd like to know,)\s*/gi, '');
   
   // Keep the response focused - if it's too long, try to extract the main question
   if (formatted.length > 200) {
@@ -75,41 +128,110 @@ const getGeminiResponse = async (req, res) => {
     
     let prompt;
     if (isIntroduction) {
-        prompt = `You are an AI interviewer conducting a friendly, conversational interview. ${resumeContext} ${contextText}\nCandidate: ${question}\nInterviewer: 
+        prompt = `You are an AI interviewer. ${resumeContext} ${contextText}\nCandidate: ${question}\nInterviewer: 
 
-After the candidate introduces themselves, ask your first question about their background and the ${interview.role} position. 
+Ask your first question about their background and the ${interview.role} position. 
 
-IMPORTANT: Use simple, everyday language. Ask a clear, straightforward question that anyone can understand. Keep it conversational and friendly. Your response must be a question.
+IMPORTANT: 
+- Respond with ONLY the question, no explanations or reasoning
+- Use simple, everyday language
+- Keep it conversational and friendly
+- Your response must be a question
 
-Examples of simple questions:\n- "What do you like most about your current job?"\n- "Can you tell me about a project you worked on?"\n- "What skills do you think are most important for this role?"\n- "How do you handle difficult situations at work?"`;
+Examples of good responses:
+- "What do you like most about your current job?"
+- "Can you tell me about a project you worked on?"
+- "What skills do you think are most important for this role?"
+- "How do you handle difficult situations at work?"`;
     } else {
-        prompt = `You are an AI interviewer conducting a friendly, conversational interview. ${resumeContext} ${contextText}\nCandidate: ${question}\nInterviewer: 
+        prompt = `You are an AI interviewer. ${resumeContext} ${contextText}\nCandidate: ${question}\nInterviewer: 
 
-Continue the interview with a follow-up question based on what they just told you.
+Ask a follow-up question based on what they just told you.
 
-IMPORTANT: Use simple, everyday language. Ask a clear, straightforward question that anyone can understand. Keep it conversational and friendly. Your response must be a question.
+IMPORTANT: 
+- Respond with ONLY the question, no explanations or reasoning
+- Use simple, everyday language
+- Keep it conversational and friendly
+- Your response must be a question
 
-Examples of simple questions:\n- "What do you like most about your current job?"\n- "Can you tell me about a project you worked on?"\n- "What skills do you think are most important for this role?"\n- "How do you handle difficult situations at work?"`;
+Examples of good responses:
+- "That's great! Can you tell me about a project you worked on recently?"
+- "Interesting! What challenges did you face in that role?"
+- "Can you give me an example of how you handled a difficult situation?"
+- "What do you think makes you a good fit for this position?"`;
     }
 
-    const result = await genAI.models.generateContent({
-        model: "gemini-1.5-flash",
-        contents: [{ role: "user", parts: [{ text: prompt }] }]
-    });
-    const rawText = result.candidates[0].content.parts[0].text;
-    let formattedText = formatResponse(rawText);
-
-    console.log('Raw AI response:', rawText);
-    console.log('Formatted response:', formattedText);
+    let formattedText;
+    let isUsingFallback = false;
+    
+    try {
+        // Primary: Try Gemini first
+        const result = await genAI.models.generateContent({
+            model: "gemini-1.5-flash",
+            contents: [{ role: "user", parts: [{ text: prompt }] }]
+        });
+        const rawText = result.candidates[0].content.parts[0].text;
+        formattedText = formatResponse(rawText);
+        console.log('✅ Using Gemini API (Primary)');
+    } catch (error) {
+        console.error("❌ Gemini API Error:", error);
+        
+        // Secondary: Switch to OpenRouter when Gemini fails
+        if (error.status === 429 || error.status >= 500 || error.message.includes('rate limit')) {
+            try {
+                console.log('🔄 Switching to OpenRouter API...');
+                const rawText = await getOpenRouterResponse(prompt);
+                console.log('OpenRouter raw response:', rawText);
+                formattedText = formatResponse(rawText);
+                console.log('OpenRouter formatted response:', formattedText);
+                console.log('✅ Using OpenRouter API (Fallback)');
+                isUsingFallback = true; // Notify frontend that we're using fallback
+            } catch (openRouterError) {
+                console.error("❌ OpenRouter API Error:", openRouterError);
+                
+                // Final fallback: Use predefined questions
+                const fallbackQuestions = [
+                    "Can you tell me about your work experience?",
+                    "What skills do you think are most important for this role?",
+                    "How do you handle difficult situations at work?",
+                    "What do you like most about your current job?",
+                    "Can you describe a project you worked on recently?",
+                    "What are your strengths in this field?",
+                    "How do you stay updated with industry trends?",
+                    "What challenges have you faced in your career?",
+                    "How do you work in a team environment?",
+                    "What are your career goals?"
+                ];
+                
+                const randomIndex = Math.floor(Math.random() * fallbackQuestions.length);
+                formattedText = fallbackQuestions[randomIndex];
+                isUsingFallback = true;
+                console.log('⚠️ Using fallback questions (all APIs failed)');
+            }
+        } else {
+            // For other Gemini errors, try OpenRouter
+            try {
+                console.log('🔄 Gemini error, trying OpenRouter...');
+                const rawText = await getOpenRouterResponse(prompt);
+                console.log('OpenRouter raw response:', rawText);
+                formattedText = formatResponse(rawText);
+                console.log('OpenRouter formatted response:', formattedText);
+                console.log('✅ Using OpenRouter API (Fallback)');
+                isUsingFallback = true;
+            } catch (openRouterError) {
+                console.error("❌ OpenRouter also failed:", openRouterError);
+                formattedText = `Can you tell me more about your experience with ${interview.role}?`;
+                isUsingFallback = true;
+            }
+        }
+    }
 
     // Ensure the response contains a question
     if (!formattedText.includes('?')) {
         console.log('No question mark found, adding one...');
-        // If no question mark, try to add one or regenerate
         if (formattedText.length < 100) {
             formattedText += '?';
         } else {
-            // If response is too long and has no question, ask for a simple follow-up
             formattedText = `What experience do you have with ${interview.role}?`;
         }
     }
@@ -118,9 +240,47 @@ Examples of simple questions:\n- "What do you like most about your current job?"
     interview.interviewHistory.push({ role: 'interviewer', text: formattedText });
     await interview.save();
 
-    res.status(200).json({ response: formattedText });
+    res.status(200).json({ 
+        aiResponse: formattedText,
+        isUsingFallback: isUsingFallback 
+    });
   } catch (error) {
     console.error("Error getting Gemini response:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Function to end interview and update status
+const endInterview = async (req, res) => {
+  try {
+    const { interviewId, status, isManual } = req.body;
+
+    if (!interviewId) {
+      return res.status(400).json({ message: "Interview ID is required" });
+    }
+
+    const interview = await Interview.findById(interviewId);
+
+    if (!interview) {
+      return res.status(404).json({ message: "Interview not found" });
+    }
+
+    // Update interview status
+    interview.status = status || true;
+    interview.completedAt = new Date();
+    interview.isManualEnd = isManual || false;
+    
+    await interview.save();
+
+    console.log(`Interview ${interviewId} ended. Status: ${status}, Manual: ${isManual}`);
+
+    res.status(200).json({ 
+      message: "Interview ended successfully",
+      interviewId: interview._id,
+      status: interview.status
+    });
+  } catch (error) {
+    console.error("Error ending interview:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -149,13 +309,30 @@ Start the interview by:
 
 IMPORTANT: Use simple, everyday language. Be friendly and welcoming. Keep it brief and conversational.`;
 
-    const result = await genAI.models.generateContent({
-        model: "gemini-1.5-flash",
-        contents: [{ role: "user", parts: [{ text: initialPrompt }] }]
-    });
+    let formattedText;
+    let isUsingFallback = false;
     
-    const rawText = result.candidates[0].content.parts[0].text;
-    const formattedText = formatResponse(rawText);
+    try {
+        const result = await genAI.models.generateContent({
+            model: "gemini-1.5-flash",
+            contents: [{ role: "user", parts: [{ text: initialPrompt }] }]
+        });
+        
+        const rawText = result.candidates[0].content.parts[0].text;
+        formattedText = formatResponse(rawText);
+    } catch (error) {
+        console.error("Gemini API Error in startInterview:", error);
+        
+        // Handle rate limit error
+        if (error.status === 429) {
+            formattedText = `Hello! I'm your AI interviewer. Can you tell me about yourself and your experience with ${interview.role}?`;
+            isUsingFallback = true;
+        } else {
+            // For other errors, use a generic introduction
+            formattedText = `Hello! I'm your AI interviewer. Please introduce yourself and tell me about your background.`;
+            isUsingFallback = true;
+        }
+    }
 
     // Ensure interviewHistory exists before pushing
     if (!interview.interviewHistory) {
@@ -164,11 +341,14 @@ IMPORTANT: Use simple, everyday language. Be friendly and welcoming. Keep it bri
     interview.interviewHistory.push({ role: 'interviewer', text: formattedText });
     await interview.save();
 
-    res.status(200).json({ initialQuestion: formattedText });
+    res.status(200).json({ 
+        initialQuestion: formattedText,
+        usingFallback: isUsingFallback 
+    });
   } catch (error) {
     console.error("Error starting interview:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-export {getGeminiResponse, startInterview};
+export {getGeminiResponse, startInterview  , endInterview};
