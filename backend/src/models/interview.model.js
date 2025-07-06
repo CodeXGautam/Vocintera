@@ -21,7 +21,15 @@ const interviewSchema = new mongoose.Schema({
     },
     status: {
         type: Boolean,
-        default: "false"
+        default: false
+    },
+    completedAt: {
+        type: Date,
+        default: null
+    },
+    isManualEnd: {
+        type: Boolean,
+        default: false
     },
     qa: [
         {
