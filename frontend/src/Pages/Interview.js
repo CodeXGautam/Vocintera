@@ -93,8 +93,11 @@ const Interview = (props) => {
                 }
             })
             const data = await response.json();
-            // Expecting data.interviews to be an array
-            setInterviews(Array.isArray(data.interviews) ? data.interviews : []);
+            // Filter only interviews with status false (not completed)
+            const pendingInterviews = Array.isArray(data.interviews) 
+                ? data.interviews.filter(interview => !interview.status) 
+                : [];
+            setInterviews(pendingInterviews);
         } catch (error) {
             console.log("Error : ", error);
         }
@@ -105,11 +108,11 @@ const Interview = (props) => {
     },[])
 
     return (
-        <div className="flex w-[100%] relative gap-4 overflow-hidden">
+        <div className="flex flex-col lg:flex-row w-full relative gap-4 overflow-hidden">
             <Sidebar loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
 
-            <div className="w-[100%] max-h-screen bg-slate-900 flex flex-col gap-8 transition-all
-            duration-300 ease-in-out rounded-md shadow-md shadow-blue-500 p-5 overflow-y-scroll">
+            <div className="w-full lg:w-[calc(100%-250px)] max-h-screen bg-slate-900 flex flex-col gap-6 lg:gap-8 transition-all
+            duration-300 ease-in-out rounded-md shadow-md shadow-blue-500 p-3 lg:p-5 overflow-y-scroll">
 
                 <div className="flex flex-col gap-10">
                     <div className="flex flex-col min-h-screen rounded-xl p-4
@@ -122,11 +125,11 @@ const Interview = (props) => {
 
                         {
                             interviews && interviews.length > 0 ? (
-                                <div className="w-[100%] flex flex-col gap-5">
+                                <div className="w-full flex flex-col gap-4 lg:gap-5">
                                     {
                                         interviews.map((interview,idx) => {
                                             return (
-                                                <div className="flex justify-between w-[100%] border-2 border-blue-900 p-4 rounded-xl" key={idx}>
+                                                <div className="flex flex-col lg:flex-row justify-between w-full border-2 border-blue-900 p-3 lg:p-4 rounded-xl" key={idx}>
                                                     <div className="flex flex-col gap-2 items-start">
 
                                                         {/* interview details will be fetched from backend  */}
@@ -142,9 +145,9 @@ const Interview = (props) => {
                                                         </button>
                                                     </div>
 
-                                                    <div className="flex justify-center items-center rounded-xl opacity-[0.4]">
+                                                    <div className="flex justify-center items-center rounded-xl opacity-[0.4] mt-3 lg:mt-0">
                                                         <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRPRwgKrfySS9Kd6_0DSFB6ZyVgpmScXBVI0w&s"
-                                                            alt="interview" className="w-[100%] rounded-xl" />
+                                                            alt="interview" className="w-full max-w-[200px] lg:max-w-[150px] rounded-xl" />
                                                     </div>
 
                                                 </div>
@@ -173,8 +176,8 @@ const Interview = (props) => {
                     <div className="flex flex-col gap-8 items-center mt-5" id="schedule">
                         <h1 className="flex text-blue-800 text-xl sm:text-2xl md:text-3xl lg:text-4xl
                          font-semibold text-center">Schedule An Interview</h1>
-                        <form className='flex flex-col gap-5 border-2 shadow-md shadow-blue-900 w-[70%] max-w-[600px]
-            border-slate-900 p-10 rounded-xl min-w-[300px]' onSubmit={submitHandler}>
+                        <form className='flex flex-col gap-5 border-2 shadow-md shadow-blue-900 w-full sm:w-[90%] md:w-[80%] lg:w-[70%] max-w-[600px]
+            border-slate-900 p-5 lg:p-10 rounded-xl min-w-[300px]' onSubmit={submitHandler}>
 
                             <label htmlFor="role" className="text-gray-300 flex flex-col gap-2 w-[100%]">Role *
                                 <select name="role" id="role" className="flex justify-center text-gray-300 text-sm items-center 

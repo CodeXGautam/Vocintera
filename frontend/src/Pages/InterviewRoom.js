@@ -6,11 +6,22 @@ import { FaMicrophoneSlash } from "react-icons/fa";
 import { MdCallEnd } from "react-icons/md";
 import { FaVolumeUp, FaVolumeMute } from "react-icons/fa";
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+import { useNavigate } from "react-router-dom";
+
+// Enhanced speech recognition configuration
+const SPEECH_CONFIG = {
+    continuous: true,
+    interimResults: true,
+    lang: 'en-US',
+    maxAlternatives: 1,
+    grammars: null
+};
 
 
 const InterviewRoom = () => {
 
         const { interviewId } = useParams();
+        const navigate = useNavigate();
         const [mic, setMic] = useState(false);
         const [interviewHistory, setInterviewHistory] = useState([]);
         const [loading, setLoading] = useState(true);
@@ -18,7 +29,20 @@ const InterviewRoom = () => {
         const [isSpeaking, setIsSpeaking] = useState(false);
         const [availableVoices, setAvailableVoices] = useState([]);
         const [selectedVoice, setSelectedVoice] = useState(null);
+        const [isListening, setIsListening] = useState(false);
+        const [timeoutCountdown, setTimeoutCountdown] = useState(0);
+        const [usingFallback, setUsingFallback] = useState(false);
+        const [speechError, setSpeechError] = useState(null);
+        const [recognitionQuality, setRecognitionQuality] = useState('good');
+        const [interviewTimeRemaining, setInterviewTimeRemaining] = useState(900); // 15 minutes in seconds
+        const [isInterviewEnding, setIsInterviewEnding] = useState(false);
         const speechSynthesisRef = useRef(null);
+        const speechTimeoutRef = useRef(null);
+        const lastTranscriptRef = useRef('');
+        const countdownIntervalRef = useRef(null);
+        const transcriptBufferRef = useRef('');
+        const interviewTimerRef = useRef(null);
+        const confidenceThreshold = 0.7;
 
         useEffect(() => {
             const startInterview = async () => {
@@ -37,6 +61,12 @@ const InterviewRoom = () => {
                         setInterviewHistory([{ role: 'interviewer', text: initialQuestion }]);
                         // Speak the initial question
                         speakText(initialQuestion);
+                        
+                        // Check if using fallback
+                        if (data.usingFallback) {
+                            setUsingFallback(true);
+                            setTimeout(() => setUsingFallback(false), 5000); // Show for 5 seconds
+                        }
                     } else {
                         toast.error(data.message || "Failed to start interview");
                     }
@@ -52,6 +82,37 @@ const InterviewRoom = () => {
                 startInterview();
             }
         }, [interviewId]);
+
+        // Interview timer effect
+        useEffect(() => {
+            if (interviewId && !loading) {
+                // Start the 15-minute timer
+                interviewTimerRef.current = setInterval(() => {
+                    setInterviewTimeRemaining(prev => {
+                        if (prev <= 1) {
+                            // Interview time is up
+                            clearInterval(interviewTimerRef.current);
+                            endInterview();
+                            return 0;
+                        }
+                        
+                        // Show warning at 5 minutes remaining
+                        if (prev === 300) {
+                            toast.error('5 minutes remaining in the interview!');
+                        }
+                        
+                        return prev - 1;
+                    });
+                }, 1000);
+
+                // Cleanup timer on unmount
+                return () => {
+                    if (interviewTimerRef.current) {
+                        clearInterval(interviewTimerRef.current);
+                    }
+                };
+            }
+        }, [interviewId, loading]);
 
         // Load available voices
         useEffect(() => {
@@ -76,22 +137,208 @@ const InterviewRoom = () => {
             // Also listen for voices to load
             window.speechSynthesis.onvoiceschanged = loadVoices;
             
-            // Cleanup
-            return () => {
-                if (speechSynthesisRef.current) {
-                    window.speechSynthesis.cancel();
-                }
-            };
+                    // Cleanup
+        return () => {
+            if (speechSynthesisRef.current) {
+                window.speechSynthesis.cancel();
+            }
+            if (speechTimeoutRef.current) {
+                clearTimeout(speechTimeoutRef.current);
+            }
+            if (countdownIntervalRef.current) {
+                clearInterval(countdownIntervalRef.current);
+            }
+            if (interviewTimerRef.current) {
+                clearInterval(interviewTimerRef.current);
+            }
+        };
         }, []);
 
         const {
             transcript,
             listening,
             resetTranscript,
-            browserSupportsSpeechRecognition
-        } = useSpeechRecognition();
+            browserSupportsSpeechRecognition,
+            isMicrophoneAvailable
+        } = useSpeechRecognition({
+            commands: [],
+            continuous: true,
+            interimResults: true,
+            lang: 'en-US',
+            maxAlternatives: 1
+        });
 
-        // Enhanced speech synthesis function for more human-like voice
+        // Function to send response to backend
+        const sendResponseToBackend = async (question) => {
+            if (!question || question.trim() === '') return;
+            
+            setLoading(true);
+            try {
+                const res = await fetch(process.env.REACT_APP_BACKEND_URI + '/gemini/get-response', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ interviewId, question: question.trim() })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    const aiResponse = data.aiResponse;
+                    const isUsingFallback = data.isUsingFallback;
+                    
+                    setInterviewHistory(prev => [...prev, { role: 'candidate', text: question.trim() }, { role: 'interviewer', text: aiResponse }]);
+                    // Speak the AI response
+                    speakText(aiResponse);
+                    
+                    // Show fallback notification if using Ollama or fallback questions
+                    if (isUsingFallback) {
+                        setUsingFallback(true);
+                        setTimeout(() => setUsingFallback(false), 5000); // Show for 5 seconds
+                    }
+                } else {
+                    if (data.message && data.message.includes("rate limit")) {
+                        toast.error("API rate limit reached. Using fallback questions. Please try again later.");
+                        setUsingFallback(true);
+                    } else {
+                        toast.error(data.message || "Failed to get Gemini response");
+                    }
+                }
+            } catch (error) {
+                console.error("Error getting Gemini response:", error);
+                toast.error("Failed to get Gemini response");
+            } finally {
+                resetTranscript();
+                setLoading(false);
+                setIsListening(false);
+            }
+        };
+
+        // Function to handle speech timeout
+        const handleSpeechTimeout = () => {
+            if (transcript && transcript.trim() !== '' && transcript !== lastTranscriptRef.current) {
+                lastTranscriptRef.current = transcript;
+                sendResponseToBackend(transcript);
+            }
+        };
+
+        // Function to end the interview
+        const endInterview = async (isManual = false) => {
+            setIsInterviewEnding(true);
+            
+            // Stop speech recognition
+            if (mic) {
+                SpeechRecognition.stopListening();
+                setMic(false);
+                setIsListening(false);
+            }
+            
+            // Clear all timers
+            if (speechTimeoutRef.current) {
+                clearTimeout(speechTimeoutRef.current);
+            }
+            if (countdownIntervalRef.current) {
+                clearInterval(countdownIntervalRef.current);
+            }
+            if (interviewTimerRef.current) {
+                clearInterval(interviewTimerRef.current);
+            }
+            
+            try {
+                // Update interview status to completed
+                const res = await fetch(process.env.REACT_APP_BACKEND_URI + '/gemini/end-interview', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ 
+                        interviewId,
+                        status: true,
+                        isManual: isManual
+                    })
+                });
+                
+                if (!res.ok) {
+                    console.error('Failed to update interview status');
+                }
+            } catch (error) {
+                console.error('Error updating interview status:', error);
+            }
+            
+            // Add ending message
+            const endingMessage = "Thank you for your time! This concludes our interview. We'll review your responses and get back to you soon.";
+            setInterviewHistory(prev => [...prev, { role: 'interviewer', text: endingMessage }]);
+            
+            // Speak the ending message
+            speakText(endingMessage);
+            
+            // Show completion toast
+            toast.success('Interview completed! Thank you for your time.');
+            
+            // Redirect to interviews page after 3 seconds
+            setTimeout(() => {
+                navigate('/interviews');
+            }, 3000);
+        };
+
+        // Enhanced effect to monitor transcript changes with better performance
+        useEffect(() => {
+            if (listening && transcript && transcript.trim() !== '') {
+                // Buffer the transcript for better stability
+                transcriptBufferRef.current = transcript;
+                
+                // Clear existing timeout and countdown
+                if (speechTimeoutRef.current) {
+                    clearTimeout(speechTimeoutRef.current);
+                }
+                if (countdownIntervalRef.current) {
+                    clearInterval(countdownIntervalRef.current);
+                }
+                
+                // Fixed 5-second timeout for all responses
+                const timeoutDuration = 5000; // 5 seconds
+                
+                // Start countdown
+                let countdown = Math.floor(timeoutDuration / 1000);
+                setTimeoutCountdown(countdown);
+                
+                countdownIntervalRef.current = setInterval(() => {
+                    countdown--;
+                    setTimeoutCountdown(countdown);
+                    if (countdown <= 0) {
+                        clearInterval(countdownIntervalRef.current);
+                        setTimeoutCountdown(0);
+                    }
+                }, 1000);
+                
+                // Set new timeout
+                speechTimeoutRef.current = setTimeout(() => {
+                    handleSpeechTimeout();
+                    clearInterval(countdownIntervalRef.current);
+                    setTimeoutCountdown(0);
+                }, timeoutDuration);
+                
+                // Assess recognition quality
+                const words = transcript.trim().split(' ').length;
+                if (words > 20) {
+                    setRecognitionQuality('excellent');
+                } else if (words > 10) {
+                    setRecognitionQuality('good');
+                } else {
+                    setRecognitionQuality('fair');
+                }
+            } else {
+                // Clear countdown if not listening or no transcript
+                if (countdownIntervalRef.current) {
+                    clearInterval(countdownIntervalRef.current);
+                    setTimeoutCountdown(0);
+                }
+                setRecognitionQuality('good');
+            }
+        }, [transcript, listening]);
+
+        // Enhanced speech synthesis function with performance optimizations
         const speakText = (text, testMode = false) => {
             if (!speechEnabled && !testMode) return;
             
@@ -100,7 +347,14 @@ const InterviewRoom = () => {
                 window.speechSynthesis.cancel();
             }
             
-            const utterance = new SpeechSynthesisUtterance(text);
+            // Optimize text for better speech synthesis
+            const optimizedText = text
+                .replace(/\s+/g, ' ') // Normalize whitespace
+                .trim();
+            
+            if (!optimizedText) return;
+            
+            const utterance = new SpeechSynthesisUtterance(optimizedText);
             
             // Get available voices and wait for them to load
             let voices = window.speechSynthesis.getVoices();
@@ -189,60 +443,121 @@ const InterviewRoom = () => {
 
         const micHandler = async () => {
             if (!mic) {
-                SpeechRecognition.startListening();
-                setMic(true);
-            } else {
-                SpeechRecognition.stopListening();
-                setMic(!mic);
-                setLoading(true);
                 try {
-                    const res = await fetch(process.env.REACT_APP_BACKEND_URI + '/gemini/get-response', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        credentials: 'include',
-                        body: JSON.stringify({ interviewId, question: transcript })
-                    });
-                    const data = await res.json();
-                    if (res.ok) {
-                        const aiResponse = data.response;
-                        setInterviewHistory(prev => [...prev, { role: 'candidate', text: transcript }, { role: 'interviewer', text: aiResponse }]);
-                        // Speak the AI response
-                        speakText(aiResponse);
-                    } else {
-                        toast.error(data.message || "Failed to get Gemini response");
+                    // Check microphone availability
+                    if (!isMicrophoneAvailable) {
+                        setSpeechError('Microphone not available. Please check permissions.');
+                        toast.error('Microphone not available. Please check permissions.');
+                        return;
                     }
+                    
+                    // Clear any previous errors
+                    setSpeechError(null);
+                    
+                    // Start listening with enhanced configuration
+                    SpeechRecognition.startListening(SPEECH_CONFIG);
+                    setMic(true);
+                    setIsListening(true);
+                    lastTranscriptRef.current = '';
+                    transcriptBufferRef.current = '';
+                    
+                    // Reset recognition quality
+                    setRecognitionQuality('good');
+                    
+                    console.log('🎤 Speech recognition started with enhanced settings');
                 } catch (error) {
-                    console.error("Error getting Gemini response:", error);
-                    toast.error("Failed to get Gemini response");
-                } finally {
-                    resetTranscript();
-                    setLoading(false);
+                    console.error('Error starting speech recognition:', error);
+                    setSpeechError('Failed to start speech recognition');
+                    toast.error('Failed to start speech recognition');
+                    setMic(false);
+                    setIsListening(false);
+                }
+            } else {
+                try {
+                    // Stop listening manually
+                    SpeechRecognition.stopListening();
+                    setMic(false);
+                    setIsListening(false);
+                    
+                    // Clear any existing timeout
+                    if (speechTimeoutRef.current) {
+                        clearTimeout(speechTimeoutRef.current);
+                    }
+                    if (countdownIntervalRef.current) {
+                        clearInterval(countdownIntervalRef.current);
+                    }
+                    setTimeoutCountdown(0);
+                    
+                    // Send current transcript if available
+                    const finalTranscript = transcriptBufferRef.current || transcript;
+                    if (finalTranscript && finalTranscript.trim() !== '') {
+                        sendResponseToBackend(finalTranscript);
+                    }
+                    
+                    console.log('🎤 Speech recognition stopped');
+                } catch (error) {
+                    console.error('Error stopping speech recognition:', error);
+                    setSpeechError('Failed to stop speech recognition');
                 }
             }
         };
 
 
         return (
-            <div className="flex flex-col gap-3 max-h-screen p-5">
+            <div className="flex flex-col gap-3 p-2 sm:p-3 lg:p-5 overflow-hidden h-[100%]">
 
-                <div className="flex items-center justify-center font-extrabold text-3xl text-slate-200">
+                <div className="flex items-center justify-center font-extrabold text-2xl sm:text-3xl text-slate-200">
                     Vocintera
                 </div>
 
-                <div className="flex items-center justify-center font-semibold text-md text-blue-800">
-                    Interview Panel
+                <div className="flex flex-col sm:flex-row items-center justify-between font-semibold text-sm sm:text-md text-blue-800 px-2 sm:px-4 gap-2">
+                    <span className="text-center">Interview Panel</span>
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs sm:text-sm text-gray-400">Time Remaining:</span>
+                        <span className={`font-bold text-sm sm:text-md ${interviewTimeRemaining <= 300 ? 'text-red-500' : interviewTimeRemaining <= 600 ? 'text-yellow-500' : 'text-green-500'}`}>
+                            {Math.floor(interviewTimeRemaining / 60)}:{(interviewTimeRemaining % 60).toString().padStart(2, '0')}
+                        </span>
+                    </div>
                 </div>
 
-                <div className="flex w-[100%] h-screen gap-5">
-                    <div className="flex flex-col gap-2 justify-start items-center w-[100%] bg-slate-900 
-                shadow-md shadow-blue-800 rounded-md hover:bg-slate-800 p-4 overflow-y-scroll">
-                        <div className="flex items-center font-semibold text-blue-600 mb-4">
+                <div className="flex flex-col lg:flex-row gap-2 sm:gap-3 lg:gap-5 overflow-hidden">
+                    <div className="flex flex-col gap-2 justify-start items-center w-full lg:w-1/2 bg-slate-900 
+                shadow-md shadow-blue-800 rounded-md hover:bg-slate-800 p-2 sm:p-3 lg:p-4 overflow-y-scroll">
+                        <div className="flex flex-wrap items-center font-semibold text-blue-600 mb-2 sm:mb-4 text-sm sm:text-base">
                             Vocintera (AI Interviewer)
                             {isSpeaking && (
                                 <span className="ml-2 text-green-400 animate-pulse">
                                     🔊 Speaking...
+                                </span>
+                            )}
+                            {isListening && (
+                                <span className="ml-2 text-red-400 animate-pulse">
+                                    🎤 Listening...
+                                    {timeoutCountdown > 0 && (
+                                        <span className="ml-1 text-yellow-400">
+                                            ({timeoutCountdown}s)
+                                        </span>
+                                    )}
+                                </span>
+                            )}
+                            {usingFallback && (
+                                <span className="ml-2 text-orange-400 animate-pulse">
+                                    🔄 Using OpenRouter AI
+                                </span>
+                            )}
+                            {speechError && (
+                                <span className="ml-2 text-red-400 animate-pulse">
+                                    ⚠️ {speechError}
+                                </span>
+                            )}
+                            {recognitionQuality === 'excellent' && (
+                                <span className="ml-2 text-green-400">
+                                    🎯 Excellent Recognition
+                                </span>
+                            )}
+                            {recognitionQuality === 'fair' && (
+                                <span className="ml-2 text-yellow-400">
+                                    📝 Fair Recognition
                                 </span>
                             )}
                         </div>
@@ -250,40 +565,74 @@ const InterviewRoom = () => {
                             <p className="text-slate-400">Starting interview...</p>
                         ) : (
                             interviewHistory.map((entry, index) => (
-                                <div key={index} className={`w-full p-2 rounded-md mb-2 ${entry.role === 'interviewer' ? 'bg-blue-900 text-white self-start' : 'bg-gray-700 text-white self-end'}`}>
+                                <div key={index} className={`w-full p-2 rounded-md mb-2 text-sm sm:text-base ${entry.role === 'interviewer' ? 'bg-blue-900 text-white self-start' : 'bg-gray-700 text-white self-end'}`}>
                                     <strong>{entry.role === 'interviewer' ? 'AI:' : 'You:'}</strong> {entry.text}
                                 </div>
                             ))
                         )}
                     </div>
 
-                    <div className="flex flex-col gap-2 justify-start items-center w-[100%] bg-slate-900
-                shadow-md shadow-blue-800 rounded-md hover:bg-slate-800 p-4 overflow-y-scroll">
-                        <div className="flex items-center font-semibold text-blue-600 mb-4">
+                    <div className="flex flex-col gap-2 justify-start items-center w-full lg:w-1/2 bg-slate-900
+                shadow-md shadow-blue-800 rounded-md hover:bg-slate-800 p-2 sm:p-3 lg:p-4 overflow-y-scroll">
+                        <div className="flex items-center font-semibold text-blue-600 mb-2 sm:mb-4 text-sm sm:text-base">
                             Your Transcript
                         </div>
                         <div className="w-full p-2 rounded-md bg-gray-700 text-white">
-                            {transcript}
+                            <div className="text-xs sm:text-sm text-gray-300 mb-1">
+                                {recognitionQuality === 'excellent' && '🎯 High Quality Recognition'}
+                                {recognitionQuality === 'good' && '✅ Good Recognition'}
+                                {recognitionQuality === 'fair' && '📝 Fair Recognition'}
+                            </div>
+                            <div className="text-white text-sm sm:text-base">
+                                {transcript || 'Start speaking...'}
+                            </div>
+                            {transcript && (
+                                <div className="text-xs text-gray-400 mt-1">
+                                    Words: {transcript.trim().split(' ').length} | 
+                                    Characters: {transcript.trim().length}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
 
-                <div className="flex w-[100%] justify-center items-center gap-4 mt-10">
+                <div className="flex flex-col sm:flex-row w-full justify-center items-center gap-3 sm:gap-4 mt-4 sm:mt-6 lg:mt-10 px-2 sm:px-4">
                     <div className="flex flex-col relative">
                         
-                        <button className="flex justify-center items-center rounded-full p-2 text-400 hover:text-500
-                            bg-slate-700 hover:bg-slate-600 text-xl" onClick={micHandler}>
+                        <button 
+                            className={`flex justify-center items-center rounded-full p-2 sm:p-3 text-400 hover:text-500 text-lg sm:text-xl ${
+                                isInterviewEnding ? 'bg-slate-500 cursor-not-allowed' : 'bg-slate-700 hover:bg-slate-600'
+                            }`} 
+                            onClick={micHandler}
+                            disabled={isInterviewEnding}
+                        >
                             {mic ? <FaMicrophone /> : <FaMicrophoneSlash />}
                         </button>
                         
                         <span className="absolute top-[-13px] right-0 bg-slate-800 w-3 h-3 rounded-full"></span>
                         <p className="text-slate-400 absolute top-[-32px] text-[10px] bg-slate-800 p-2 rounded-full
-                         right-[-18px] flex justify-center items-center z-1">{listening ? 'on' : 'off'}</p>
+                         right-[-18px] flex justify-center items-center z-1">
+                            {mic ? (isListening ? 'Listening' : 'Ready') : 'Off'}
+                        </p>
                     </div>
 
+                                        <button 
+                        className={`flex justify-center items-center rounded-full p-2 sm:p-3 text-white text-sm sm:text-lg font-semibold transition-all duration-300 ${
+                            isInterviewEnding 
+                                ? 'bg-gray-500 cursor-not-allowed' 
+                                : 'bg-red-600 hover:bg-red-700 active:bg-red-800 shadow-lg hover:shadow-xl'
+                        }`}
+                        onClick={() => endInterview(true)}
+                        disabled={isInterviewEnding}
+                        title="End Interview"
+                    >
+                        <MdCallEnd className="mr-1 sm:mr-2" />
+                        <span className="hidden sm:inline">End Interview</span>
+                        <span className="sm:hidden">End</span>
+                    </button>
+
                     <button 
-                        className="flex justify-center items-center rounded-full p-2 text-400 hover:text-500
-                            bg-slate-700 hover:bg-slate-600 text-xl" 
+                        className="flex justify-center items-center rounded-full p-2 sm:p-3 text-400 hover:text-500 text-lg sm:text-xl bg-slate-700 hover:bg-slate-600"
                         onClick={() => setSpeechEnabled(!speechEnabled)}
                         title={speechEnabled ? "Disable AI Speech" : "Enable AI Speech"}
                     >
@@ -292,7 +641,7 @@ const InterviewRoom = () => {
 
                     {speechEnabled && availableVoices.length > 0 && (
                         <select 
-                            className="bg-slate-700 text-slate-300 px-3 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500"
+                            className="bg-slate-700 text-slate-300 px-2 sm:px-3 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 text-sm sm:text-base"
                             value={selectedVoice?.name || ''}
                             onChange={(e) => {
                                 const voice = availableVoices.find(v => v.name === e.target.value);
@@ -310,8 +659,8 @@ const InterviewRoom = () => {
 
                     {speechEnabled && selectedVoice && (
                         <button 
-                            className="flex justify-center items-center rounded-full p-2 text-400 hover:text-500
-                                bg-green-700 hover:bg-green-600 text-xl" 
+                            className="flex justify-center items-center rounded-full p-2 sm:p-3 text-400 hover:text-500
+                                bg-green-700 hover:bg-green-600 text-lg sm:text-xl" 
                             onClick={testVoice}
                             title="Test Selected Voice"
                         >
@@ -319,10 +668,7 @@ const InterviewRoom = () => {
                         </button>
                     )}
 
-                    <button className="flex justify-center items-center p-3 rounded-xl bg-red-800 text-xl text-slate-400
-                hover:text-300 font-semibold hover:bg-red-700">
-                        <MdCallEnd />
-                    </button>
+
                 </div>
             </div>
         )
