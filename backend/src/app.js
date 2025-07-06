@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import { registerUser, loginUser, refreshAccessToken, logoutUser,getCurrentUser, googleAuthCode, getInterviewInfo } from './controllers/userController.js';
 import { verifyJwt } from './middleware/auth.middleware.js';
 import { createInterview } from './controllers/interviewController.js';
+import { getGeminiResponse, startInterview } from './controllers/responseController.js';
 import { uploadResume, uploadAvatar } from './controllers/userController.js';
 import { upload } from './middleware/multer.js';
 
@@ -35,5 +36,7 @@ app.post('/api/v1/auth/google-auth-code', googleAuthCode);
 app.post('/api/v1/createInterview', verifyJwt, upload.single('resume'), uploadResume, createInterview);
 app.post('/api/v1/uploadAvatar', verifyJwt, upload.single('avatar'), uploadAvatar);
 app.get('/api/v1/getInterviewInfo',verifyJwt, getInterviewInfo);
+app.post('/api/v1/gemini/get-response', verifyJwt, getGeminiResponse);
+app.post('/api/v1/gemini/start-interview', verifyJwt, startInterview);
 
 export default app;
