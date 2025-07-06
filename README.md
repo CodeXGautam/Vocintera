@@ -47,11 +47,17 @@ frontend/
 
 ## UI Screenshots
 
-![Login Page](./frontend/public/screenshots/login.png)
+![Landing Page](./frontend/public/screenshots/landingPage.png)
 
-![Interview Room](./frontend/public/screenshots/interviewroom.png)
+![Home Page](./frontend/public/screenshots/home.png)
 
-![Interview History](./frontend/public/screenshots/interviewhistory.png)
+![Schedule Interview](./frontend/public/screenshots/schedule.png)
+
+![Interview Room](./frontend/public/screenshots/interviewRoom.png)
+
+![Interviews](./frontend/public/screenshots/interviews.png)
+
+![Detailed Evaluation](./frontend/public/screenshots/evaluation.png)
 
 ## Getting Started
 
