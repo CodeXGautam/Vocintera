@@ -276,9 +276,28 @@ const InterviewRoom = () => {
             // Show completion toast
             toast.success('Interview completed! Thank you for your time.');
             
+            // Automatically evaluate the interview
+            try {
+                const evalResponse = await fetch(process.env.REACT_APP_BACKEND_URI + `/evaluation/${interviewId}`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (evalResponse.ok) {
+                    toast.success('Interview evaluation completed!');
+                } else {
+                    console.log('Evaluation failed, but interview ended successfully');
+                }
+            } catch (evalError) {
+                console.error('Error evaluating interview:', evalError);
+            }
+            
             // Redirect to interviews page after 3 seconds
             setTimeout(() => {
-                navigate('/interviews');
+                navigate('/interview');
             }, 3000);
         };
 
@@ -504,26 +523,26 @@ const InterviewRoom = () => {
 
 
         return (
-            <div className="flex flex-col gap-3 p-2 sm:p-3 lg:p-5 overflow-hidden h-[100%]">
+            <div className="flex flex-col gap-2 sm:gap-3 md:gap-4 lg:gap-5 p-2 sm:p-3 md:p-4 lg:p-5 overflow-hidden h-[100%]">
 
-                <div className="flex items-center justify-center font-extrabold text-2xl sm:text-3xl text-slate-200">
+                <div className="flex items-center justify-center font-extrabold text-xl sm:text-2xl md:text-3xl text-slate-200">
                     Vocintera
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center justify-between font-semibold text-sm sm:text-md text-blue-800 px-2 sm:px-4 gap-2">
+                <div className="flex flex-col sm:flex-row items-center justify-between font-semibold text-xs sm:text-sm md:text-md text-blue-800 px-1 sm:px-2 md:px-4 gap-1 sm:gap-2">
                     <span className="text-center">Interview Panel</span>
-                    <div className="flex items-center gap-2">
-                        <span className="text-xs sm:text-sm text-gray-400">Time Remaining:</span>
-                        <span className={`font-bold text-sm sm:text-md ${interviewTimeRemaining <= 300 ? 'text-red-500' : interviewTimeRemaining <= 600 ? 'text-yellow-500' : 'text-green-500'}`}>
+                    <div className="flex items-center gap-1 sm:gap-2">
+                        <span className="text-xs text-gray-400">Time Remaining:</span>
+                        <span className={`font-bold text-xs sm:text-sm md:text-md ${interviewTimeRemaining <= 300 ? 'text-red-500' : interviewTimeRemaining <= 600 ? 'text-yellow-500' : 'text-green-500'}`}>
                             {Math.floor(interviewTimeRemaining / 60)}:{(interviewTimeRemaining % 60).toString().padStart(2, '0')}
                         </span>
                     </div>
                 </div>
 
-                <div className="flex flex-col lg:flex-row gap-2 sm:gap-3 lg:gap-5 overflow-hidden">
-                    <div className="flex flex-col gap-2 justify-start items-center w-full lg:w-1/2 bg-slate-900 
-                shadow-md shadow-blue-800 rounded-md hover:bg-slate-800 p-2 sm:p-3 lg:p-4 overflow-y-scroll">
-                        <div className="flex flex-wrap items-center font-semibold text-blue-600 mb-2 sm:mb-4 text-sm sm:text-base">
+                <div className="flex flex-col md:flex-row gap-2 sm:gap-3 md:gap-4 lg:gap-5 overflow-hidden">
+                    <div className="flex flex-col gap-2 justify-start items-center w-full md:w-1/2 bg-slate-900 
+                shadow-md shadow-blue-800 rounded-md hover:bg-slate-800 p-2 sm:p-3 md:p-4 overflow-y-scroll">
+                        <div className="flex flex-wrap items-center font-semibold text-blue-600 mb-2 sm:mb-3 md:mb-4 text-xs sm:text-sm md:text-base">
                             Vocintera (AI Interviewer)
                             {isSpeaking && (
                                 <span className="ml-2 text-green-400 animate-pulse">
@@ -562,28 +581,28 @@ const InterviewRoom = () => {
                             )}
                         </div>
                         {loading && interviewHistory.length === 0 ? (
-                            <p className="text-slate-400">Starting interview...</p>
+                            <p className="text-slate-400 text-xs sm:text-sm">Starting interview...</p>
                         ) : (
                             interviewHistory.map((entry, index) => (
-                                <div key={index} className={`w-full p-2 rounded-md mb-2 text-sm sm:text-base ${entry.role === 'interviewer' ? 'bg-blue-900 text-white self-start' : 'bg-gray-700 text-white self-end'}`}>
+                                <div key={index} className={`w-full p-2 rounded-md mb-2 text-xs sm:text-sm md:text-base ${entry.role === 'interviewer' ? 'bg-blue-900 text-white self-start' : 'bg-gray-700 text-white self-end'}`}>
                                     <strong>{entry.role === 'interviewer' ? 'AI:' : 'You:'}</strong> {entry.text}
                                 </div>
                             ))
                         )}
                     </div>
 
-                    <div className="flex flex-col gap-2 justify-start items-center w-full lg:w-1/2 bg-slate-900
-                shadow-md shadow-blue-800 rounded-md hover:bg-slate-800 p-2 sm:p-3 lg:p-4 overflow-y-scroll">
-                        <div className="flex items-center font-semibold text-blue-600 mb-2 sm:mb-4 text-sm sm:text-base">
+                    <div className="flex flex-col gap-2 justify-start items-center w-full md:w-1/2 bg-slate-900
+                shadow-md shadow-blue-800 rounded-md hover:bg-slate-800 p-2 sm:p-3 md:p-4 overflow-y-scroll">
+                        <div className="flex items-center font-semibold text-blue-600 mb-2 sm:mb-3 md:mb-4 text-xs sm:text-sm md:text-base">
                             Your Transcript
                         </div>
                         <div className="w-full p-2 rounded-md bg-gray-700 text-white">
-                            <div className="text-xs sm:text-sm text-gray-300 mb-1">
+                            <div className="text-xs text-gray-300 mb-1">
                                 {recognitionQuality === 'excellent' && '🎯 High Quality Recognition'}
                                 {recognitionQuality === 'good' && '✅ Good Recognition'}
                                 {recognitionQuality === 'fair' && '📝 Fair Recognition'}
                             </div>
-                            <div className="text-white text-sm sm:text-base">
+                            <div className="text-white text-xs sm:text-sm md:text-base">
                                 {transcript || 'Start speaking...'}
                             </div>
                             {transcript && (
@@ -596,11 +615,11 @@ const InterviewRoom = () => {
                     </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row w-full justify-center items-center gap-3 sm:gap-4 mt-4 sm:mt-6 lg:mt-10 px-2 sm:px-4">
+                <div className="flex flex-col sm:flex-row w-full justify-center items-center gap-2 sm:gap-3 md:gap-4 mt-3 sm:mt-4 md:mt-6 lg:mt-10 px-1 sm:px-2 md:px-4">
                     <div className="flex flex-col relative">
                         
                         <button 
-                            className={`flex justify-center items-center rounded-full p-2 sm:p-3 text-400 hover:text-500 text-lg sm:text-xl ${
+                            className={`flex justify-center items-center rounded-full p-1.5 sm:p-2 md:p-3 text-400 hover:text-500 text-base sm:text-lg md:text-xl ${
                                 isInterviewEnding ? 'bg-slate-500 cursor-not-allowed' : 'bg-slate-700 hover:bg-slate-600'
                             }`} 
                             onClick={micHandler}
@@ -609,15 +628,15 @@ const InterviewRoom = () => {
                             {mic ? <FaMicrophone /> : <FaMicrophoneSlash />}
                         </button>
                         
-                        <span className="absolute top-[-13px] right-0 bg-slate-800 w-3 h-3 rounded-full"></span>
-                        <p className="text-slate-400 absolute top-[-32px] text-[10px] bg-slate-800 p-2 rounded-full
-                         right-[-18px] flex justify-center items-center z-1">
+                        <span className="absolute top-[-10px] sm:top-[-13px] right-0 bg-slate-800 w-2 h-2 sm:w-3 sm:h-3 rounded-full"></span>
+                        <p className="text-slate-400 absolute top-[-25px] sm:top-[-32px] text-[8px] sm:text-[10px] bg-slate-800 p-1 sm:p-2 rounded-full
+                         right-[-15px] sm:right-[-18px] flex justify-center items-center z-1">
                             {mic ? (isListening ? 'Listening' : 'Ready') : 'Off'}
                         </p>
                     </div>
 
                                         <button 
-                        className={`flex justify-center items-center rounded-full p-2 sm:p-3 text-white text-sm sm:text-lg font-semibold transition-all duration-300 ${
+                        className={`flex justify-center items-center rounded-full p-1.5 sm:p-2 md:p-3 text-white text-xs sm:text-sm md:text-lg font-semibold transition-all duration-300 ${
                             isInterviewEnding 
                                 ? 'bg-gray-500 cursor-not-allowed' 
                                 : 'bg-red-600 hover:bg-red-700 active:bg-red-800 shadow-lg hover:shadow-xl'
@@ -632,7 +651,7 @@ const InterviewRoom = () => {
                     </button>
 
                     <button 
-                        className="flex justify-center items-center rounded-full p-2 sm:p-3 text-400 hover:text-500 text-lg sm:text-xl bg-slate-700 hover:bg-slate-600"
+                        className="flex justify-center items-center rounded-full p-1.5 sm:p-2 md:p-3 text-400 hover:text-500 text-base sm:text-lg md:text-xl bg-slate-700 hover:bg-slate-600"
                         onClick={() => setSpeechEnabled(!speechEnabled)}
                         title={speechEnabled ? "Disable AI Speech" : "Enable AI Speech"}
                     >
@@ -641,7 +660,7 @@ const InterviewRoom = () => {
 
                     {speechEnabled && availableVoices.length > 0 && (
                         <select 
-                            className="bg-slate-700 text-slate-300 px-2 sm:px-3 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 text-sm sm:text-base"
+                            className="bg-slate-700 text-slate-300 px-1 sm:px-2 md:px-3 py-1 sm:py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 text-xs sm:text-sm md:text-base"
                             value={selectedVoice?.name || ''}
                             onChange={(e) => {
                                 const voice = availableVoices.find(v => v.name === e.target.value);
@@ -659,8 +678,8 @@ const InterviewRoom = () => {
 
                     {speechEnabled && selectedVoice && (
                         <button 
-                            className="flex justify-center items-center rounded-full p-2 sm:p-3 text-400 hover:text-500
-                                bg-green-700 hover:bg-green-600 text-lg sm:text-xl" 
+                            className="flex justify-center items-center rounded-full p-1.5 sm:p-2 md:p-3 text-400 hover:text-500
+                                bg-green-700 hover:bg-green-600 text-base sm:text-lg md:text-xl" 
                             onClick={testVoice}
                             title="Test Selected Voice"
                         >
