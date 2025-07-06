@@ -73,7 +73,7 @@ const App = () => {
         }
         {
           loggedIn &&
-          <Route path='/interviewroom' element={<InterviewRoom />} />
+          <Route path='/interviewroom/:interviewId' element={<InterviewRoom />} />
         }
       </Routes>
     </div>
