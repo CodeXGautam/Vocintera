@@ -19,7 +19,9 @@ const LoginPage = (props) => {
    const [showpassword, setShowPassword] = useState(false);
 
    const autohome = () =>{
-      navigate('/home');
+      if(loggedIn){
+         navigate('/home');
+      }
    }
 
    const [formData, setFormData] = useState({
