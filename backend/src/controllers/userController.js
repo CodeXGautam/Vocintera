@@ -82,7 +82,8 @@ const registerUser = async (req, res) => {
 
         const options = {
             httpOnly: true,
-            secure: false,
+            secure: true, // Set to true for HTTPS
+            sameSite: 'none', // Required for cross-origin requests
         };
 
         res.status(201)
@@ -123,7 +124,8 @@ const loginUser = async (req, res) => {
 
         const options = {
             httpOnly: true,
-            secure: false,
+            secure: true, // Set to true for HTTPS
+            sameSite: 'none', // Required for cross-origin requests
         };
 
         res.status(200)
@@ -173,7 +175,8 @@ const logoutUser = async (req, res) => {
 
         const options = {
             httpOnly: true,
-            secure: false,
+            secure: true, // Set to true for HTTPS
+            sameSite: 'none', // Required for cross-origin requests
         };
 
         return res.status(200)
@@ -214,7 +217,8 @@ const refreshAccessToken = async (req, res) => {
 
         const options = {
             httpOnly: true,
-            secure: false,
+            secure: true, // Set to true for HTTPS
+            sameSite: 'none', // Required for cross-origin requests
         };
 
         res.status(200)
@@ -252,7 +256,11 @@ const googleAuthCode = async (req, res) => {
             });
         }
         const { accessToken, refreshToken } = await generateAccessRefreshToken(user._id);
-        const options = { httpOnly: true, secure: false };
+        const options = { 
+            httpOnly: true, 
+            secure: true, // Set to true for HTTPS
+            sameSite: 'none', // Required for cross-origin requests
+        };
         res.status(200)
             .cookie("accessToken", accessToken, options)
             .cookie("refreshToken", refreshToken, options)
