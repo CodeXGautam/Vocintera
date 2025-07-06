@@ -12,7 +12,7 @@ import { upload } from './middleware/multer.js';
 const app = express();
 
 app.use(cors({
-  origin:'http://localhost:3000',
+  origin:'https://vocintera.onrender.com',
   credentials: true,
   exposedHeaders: ['set-cookie']
 }));
