@@ -15,7 +15,7 @@ const Sidebar = (props) => {
 
     const setLoggedIn = props.setLoggedIn;
 
-    const [menuBar, setMenuBar] = useState(false);
+    const [menuBar, setMenuBar] = useState(true);
 
     const [userInfo, setUserInfo] = useState({
         username: '',
