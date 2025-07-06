@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Footer from "../Components/Footer";
 import Sidebar from "../Components/Sidebar";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -9,9 +10,10 @@ const Interview = (props) => {
 
     const loggedIn = props.loggedIn;
     const setLoggedIn = props.setLoggedIn;
+    const navigate = useNavigate();
 
-    const joinInterviewHandler = () => {
-        console.log("INterview joined");
+    const joinInterviewHandler = (interviewId) => {
+        navigate(`/interviewroom/${interviewId}`);
     }
 
     const [formData, setFormData] = useState({
@@ -135,8 +137,8 @@ const Interview = (props) => {
                                                         <button className="flex justify-center items-center bg-slate-700 text-slate-300 p-2 text-sm
                                         rounded-md hover:bg-slate-600 hover:scale-[1.05] transition-all duration-300
                                         shadow-md shadow-blue-700"
-                                                            onClick={joinInterviewHandler}>
-                                                            Join
+                                            onClick={() => joinInterviewHandler(interview._id)}>
+                                            Join
                                                         </button>
                                                     </div>
 
