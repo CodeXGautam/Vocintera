@@ -51,7 +51,7 @@ frontend/
 
 ![Home Page](./frontend/public/screenshots/home.png)
 
-![Schedule Interview](./frontend/public/screenshots/schedule.png)
+![Schedule Interview](./frontend/public/screenshots/shedule.png)
 
 ![Interview Room](./frontend/public/screenshots/interviewRoom.png)
 
